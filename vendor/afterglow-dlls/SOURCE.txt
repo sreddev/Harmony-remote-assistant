@@ -1,0 +1,12 @@
+These DLLs were extracted with tools/pyi_dlls.py from afterglow-windows-x86_64.exe of
+Afterglow v0.3.0-beta.6 (https://github.com/harmonic-afterglow/afterglow/releases/tag/v0.3.0-beta.6),
+whose SHA-256 matched the release's SHA256SUMS:
+af2f9a26f5beb8555fe00af15115fc0fbf1cb6b18f07e010eea10a9505299fc1
+
+Corresponding source:
+- libconcord: https://github.com/harmonic-afterglow/concordance (Afterglow's fork, GPL-3.0),
+  upstream https://github.com/jaymzh/concordance
+- the other libraries (libusb, hidapi, libzip, libcurl, OpenSSL, zlib, the MinGW runtime and
+  their dependencies) are MSYS2 MinGW packages; their sources and licences are listed at
+  https://packages.msys2.org/ under each package's name.
+- how the bundle is built: .github/workflows/bundle.yml in the Afterglow repository.

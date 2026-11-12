@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Harmony Offline Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: companion to "MyHarmony Teardown". Same field-notebook system: contents rail, one reading column, proposal cards in a grid, a simulator console. Teal = local / ours, red = Logitech cloud dependency. */
+:root {
+  --bg: #F3F6F7; --surface: #FFFFFF; --ink: #14232B; --muted: #56676F; --line: #D3DCE0;
+  --accent: #007A80; --accent-soft: #DDF0F0;
+  --ir: #B8324A; --ir-soft: #F7E3E7;
+  --code-bg: #E8EEF0; --console: #10202A; --console-ink: #CFE3E6; --console-dim: #7E979F;
+  --ok: #2F7D4A; --ok-soft: #E1F1E6; --warn: #9A6200; --warn-soft: #F8EDD6;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1519; --surface: #131F25; --ink: #E2EBEE; --muted: #93A4AC; --line: #26363E;
+    --accent: #3CC6CC; --accent-soft: #143238; --ir: #F2808F; --ir-soft: #3A1C23;
+    --code-bg: #1A2A31; --console: #081014; --console-ink: #CFE3E6; --console-dim: #6E858D;
+    --ok: #6CCB8B; --ok-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1519; --surface: #131F25; --ink: #E2EBEE; --muted: #93A4AC; --line: #26363E;
+  --accent: #3CC6CC; --accent-soft: #143238; --ir: #F2808F; --ir-soft: #3A1C23;
+  --code-bg: #1A2A31; --console: #081014; --console-ink: #CFE3E6; --console-dim: #6E858D;
+  --ok: #6CCB8B; --ok-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 48px; }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; display: grid; gap: 2px; font-size: 13px; }
+nav.toc .lbl { font: 600 11px/1 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+nav.toc a { color: var(--muted); text-decoration: none; padding: 4px 8px; border-left: 2px solid var(--line); }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent); border-left-color: var(--accent); outline: none; }
+main { min-width: 0; display: grid; gap: 56px; }
+header.hero { display: grid; gap: 14px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); color: var(--accent); letter-spacing: .04em; }
+h1 { font: 600 clamp(30px, 4.4vw, 44px)/1.1 var(--f-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font: 600 24px/1.2 var(--f-display); margin: 0 0 6px; text-wrap: balance; }
+h3 { font: 600 16px/1.3 var(--f-body); margin: 8px 0 4px; }
+p { margin: 0 0 12px; max-width: 68ch; }
+.lede { font-size: 17px; color: var(--muted); max-width: 64ch; }
+section { display: grid; gap: 14px; scroll-margin-top: 24px; }
+section > .sub { color: var(--muted); margin: 0; }
+code { font-family: var(--f-mono); font-size: .9em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+
+.verdict { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 14px; }
+.verdict .big { font: 600 22px/1.3 var(--f-display); text-wrap: balance; max-width: 40ch; }
+.meter { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.meter div { border-top: 3px solid var(--line); padding-top: 8px; display: grid; gap: 2px; }
+.meter div.ok { border-color: var(--ok); }
+.meter div.warn { border-color: var(--warn); }
+.meter div.risk { border-color: var(--ir); }
+.meter b { font: 600 14px/1.3 var(--f-body); }
+.meter span { font-size: 13.5px; color: var(--muted); }
+
+.chip { display: inline-block; font: 600 10.5px/1 var(--f-body); letter-spacing: .06em; text-transform: uppercase; padding: 4px 7px; border-radius: 99px; white-space: nowrap; vertical-align: 2px; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.risk { background: var(--ir-soft); color: var(--ir); }
+.chip.local { background: var(--accent-soft); color: var(--accent); }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 11px/1.3 var(--f-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 500; min-width: 150px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card.rec { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.card .tag { font: 600 12px/1 var(--f-mono); color: var(--accent); }
+.card h3 { font: 600 19px/1.25 var(--f-display); margin: 0; }
+.card p { margin: 0; font-size: 14.5px; }
+.card ul { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
+.scores { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; align-items: center; }
+.scores dt { color: var(--muted); }
+.scores dd { margin: 0; display: flex; gap: 3px; align-items: center; }
+.pip { width: 18px; height: 6px; border-radius: 3px; background: var(--line); }
+.pip.on { background: var(--accent); }
+.scores dd.risk .pip.on { background: var(--ir); }
+.scores dd small { margin-left: 8px; color: var(--muted); font-size: 12px; }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; display: flex; justify-content: center; min-width: 600px; }
+.caption { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Simulator */
+.sim { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: grid; }
+.sim-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tabs button, .ctl button { font: 500 13px/1 var(--f-body); border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.ctl { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-left: auto; }
+.ctl button.primary { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sizer { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.sizer input { width: 180px; accent-color: var(--accent); }
+.sizer output { font: 600 13px/1 var(--f-mono); color: var(--ink); min-width: 64px; }
+.stats { display: flex; gap: 18px; flex-wrap: wrap; margin-left: auto; font-variant-numeric: tabular-nums; }
+.stats span b { font-family: var(--f-mono); color: var(--ink); }
+.sim-body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.steps { list-style: none; margin: 0; padding: 8px 0; display: grid; border-right: 1px solid var(--line); }
+.steps li { display: grid; grid-template-columns: 34px 1fr; gap: 0 10px; padding: 8px 16px; border-left: 3px solid transparent; }
+.steps li .dir { font: 600 11px/1.6 var(--f-mono); color: var(--muted); }
+.steps li .dir.tx { color: var(--accent); }
+.steps li .dir.rx { color: var(--ir); }
+.steps li .dir.pc { color: var(--warn); }
+.steps li .bytes { font: 500 12.5px/1.5 var(--f-mono); overflow-wrap: anywhere; }
+.steps li .note { grid-column: 2; font-size: 13px; color: var(--muted); }
+.steps li.cur { background: var(--accent-soft); border-left-color: var(--accent); }
+.steps li.done .bytes { color: var(--muted); }
+.panel[hidden] { display: none !important; }
+.console { background: var(--console); color: var(--console-ink); font: 12.5px/1.6 var(--f-mono); padding: 14px 16px; min-height: 260px; max-height: 420px; overflow: auto; display: grid; align-content: start; gap: 2px; }
+.console .dim { color: var(--console-dim); }
+.progress { height: 4px; background: var(--line); }
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+.assume { font-size: 12.5px; color: var(--muted); padding: 10px 16px; border-top: 1px solid var(--line); }
+
+ol.road { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: r; }
+ol.road li { counter-increment: r; display: grid; grid-template-columns: 40px 1fr; gap: 14px; padding-bottom: 18px; position: relative; }
+ol.road li::before { content: counter(r); width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--surface); font: 600 14px/32px var(--f-mono); text-align: center; z-index: 1; }
+ol.road li::after { content: ""; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: var(--line); }
+ol.road li:last-child::after { display: none; }
+ol.road b { display: block; }
+ol.road span { color: var(--muted); font-size: 14px; display: block; max-width: 68ch; }
+ol.road .when { font: 500 12px/1.6 var(--f-mono); color: var(--accent); }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 6px; }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  nav.toc { position: static; display: flex; flex-wrap: wrap; gap: 6px; }
+  nav.toc .lbl { width: 100%; margin: 0; }
+  nav.toc a { border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; }
+  .sim-body { grid-template-columns: minmax(0, 1fr); }
+  .steps { border-right: 0; border-bottom: 1px solid var(--line); }
+  .ctl { margin-left: 0; }
+}
+</style>
+<style>:root{color-scheme:light}body{margin:0}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <div class="lbl">Contents</div>
+    <a href="#verdict">Verdict</a>
+    <a href="#map">Cloud dependencies</a>
+    <a href="#proposals">Proposals</a>
+    <a href="#related">Related projects</a>
+    <a href="#arch">Target architecture</a>
+    <a href="#sim">USB simulator</a>
+    <a href="#harness">Rosetta harness</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#sources">Sources</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">Harmony-remote-assistant · feasibility study · 11 Nov 2026</div>
+      <h1>Running a Harmony 600 without Logitech's servers</h1>
+      <p class="lede">An assessment of whether the MyHarmony workflow can run entirely on your own machine, four ways to get there, and a simulation of the USB exchange a local tool would perform. Companion to the MyHarmony Teardown page.</p>
+    </header>
+
+    <section id="verdict">
+      <h2>Verdict</h2>
+      <div class="verdict">
+        <div class="big">Yes, in stages. Backup, restore and IR learning can go fully local now. Editing the setup locally needs one piece reverse-engineered first.</div>
+        <div class="meter">
+          <div class="ok"><b>USB side: solved</b><span>The protocol scripts ship inside the app, and the open-source libconcord already reads and writes this remote family's config.</span></div>
+          <div class="ok"><b>Transport: modern</b><span>WebHID in Edge and Chrome, or hidapi from Python, Rust or Node, can reach the vendor-defined HID interface with no driver install.</span></div>
+          <div class="warn"><b>Device codes: partial</b><span>Your own devices can be exported now. New devices come from open IR databases or from learning with the remote itself.</span></div>
+          <div class="risk"><b>Config compiler: unknown</b><span>Logitech's server turns devices and activities into <code>/cfg/usercfg</code>. Its format is undocumented. That is the one real blocker.</span></div>
+        </div>
+        <p style="margin:0">The clock matters. Logitech shut down the older Harmony Remote Software service on 28 May 2025, which stranded the 900, One and 1100. The MyHarmony service your 600 uses still answered on 11 Nov 2026. While it does, it can act as an oracle: every change you make and sync shows exactly how the config bytes change.</p>
+      </div>
+    </section>
+
+    <section id="map">
+      <h2>Cloud dependencies</h2>
+      <p class="sub">Everything the cloud does today, and what would replace it locally.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Cloud function today</th><th>Local replacement</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Sign-in, account, household</td><td>Not needed. A single local profile file.</td><td><span class="chip ok">Easy</span></td></tr>
+          <tr><td>USB protocol scripts (<code>IRomDataLibrary</code>)</td><td>Already embedded in <code>Web.Driver.dll</code>. libconcord's <code>remote_mh.cpp</code> implements the same exchange.</td><td><span class="chip ok">Available</span></td></tr>
+          <tr><td>Remote identity</td><td>Read <code>/sys/sysinfo</code>: firmware, hardware, arch, skin, GUID, serial.</td><td><span class="chip ok">Available</span></td></tr>
+          <tr><td>Your devices and their IR codes</td><td>Export from your account now, while the API answers.</td><td><span class="chip warn">Do soon</span></td></tr>
+          <tr><td>Logitech's device database</td><td>Open databases (IRDB, Flipper-IRDB, LIRC) plus learning from original remotes.</td><td><span class="chip warn">Partial</span></td></tr>
+          <tr><td>IR analysis (<code>AnalyzeInfrared</code>)</td><td>Local decoding with IrpTransmogrifier (the engine behind IrScrutinizer).</td><td><span class="chip ok">Available</span></td></tr>
+          <tr><td>Activities, button maps, sequences</td><td>Local editor and data model (SQLite or JSON).</td><td><span class="chip ok">Build</span></td></tr>
+          <tr><td>Compile to remote config (<code>ICompileManager</code>)</td><td>A local compiler that writes <code>/cfg/usercfg</code>. Needs the format reverse-engineered.</td><td><span class="chip risk">Blocker</span></td></tr>
+          <tr><td>Firmware updates</td><td>Leave the current firmware alone. Not needed for daily use.</td><td><span class="chip ok">Skip</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="proposals">
+      <h2>Proposals</h2>
+      <p class="sub">Four options, ranked. The first three build on each other. Ratings are judgment calls, from 1 to 5.</p>
+      <div class="cards">
+        <article class="card rec">
+          <span class="tag">A · Lifeboat</span>
+          <h3>Backup and restore</h3>
+          <p>A small local tool that reads the remote's identity and config file and writes it back. It protects the setup you have today, permanently.</p>
+          <ul>
+            <li>Single-file WebHID web page, or a Python script on <code>hidapi</code></li>
+            <li>Uses only operations libconcord already performs</li>
+            <li>Refuses to restore onto a remote with a different GUID</li>
+          </ul>
+          <dl class="scores">
+            <dt>Feasibility</dt><dd><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i></dd>
+            <dt>Effort</dt><dd><i class="pip on"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><small>days</small></dd>
+            <dt>Risk to remote</dt><dd class="risk"><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><small>low, read first</small></dd>
+          </dl>
+        </article>
+
+        <article class="card rec">
+          <span class="tag">B · Export</span>
+          <h3>Account export</h3>
+          <p>A one-time export of everything your account holds: devices with their IR commands, activities, button maps and sequences, saved as JSON.</p>
+          <ul>
+            <li>Replays the app's own SOAP calls with your signed-in session</li>
+            <li>Keeps your data usable after the servers close</li>
+            <li>Feeds the device library in proposal C</li>
+          </ul>
+          <dl class="scores">
+            <dt>Feasibility</dt><dd><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip"></i></dd>
+            <dt>Effort</dt><dd><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><small>days</small></dd>
+            <dt>Risk to remote</dt><dd class="risk"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><small>none</small></dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="tag">C · Local Studio</span>
+          <h3>Full local replacement</h3>
+          <p>A modern desktop app with its own device library, activity and button editor, and a local compiler that writes the remote's config over USB.</p>
+          <ul>
+            <li>Tauri or a WebHID web app, with SQLite storage</li>
+            <li>Compiler built with the Rosetta harness below</li>
+            <li>Works offline forever once the format is known</li>
+          </ul>
+          <dl class="scores">
+            <dt>Feasibility</dt><dd><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><small>gated on format</small></dd>
+            <dt>Effort</dt><dd><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><small>weeks to months</small></dd>
+            <dt>Risk to remote</dt><dd class="risk"><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><small>medium, A undoes it</small></dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="tag">D · Replay shim</span>
+          <h3>Fake the cloud for the old app</h3>
+          <p>Point <code>setup.myharmony.com</code> at a local HTTPS server that serves cached app packages and recorded answers, so the existing MyHarmony UI keeps loading.</p>
+          <ul>
+            <li>Needs a hosts-file entry and a locally trusted certificate</li>
+            <li>Still cannot compile new configs, so edits fail</li>
+            <li>Keeps a 2013 browser and Silverlight in use</li>
+          </ul>
+          <dl class="scores">
+            <dt>Feasibility</dt><dd><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></dd>
+            <dt>Effort</dt><dd><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><small>weeks</small></dd>
+            <dt>Risk to remote</dt><dd class="risk"><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></dd>
+          </dl>
+          <p><span class="chip risk">Not recommended</span> It keeps the weakest parts of the old stack and still hits the same compiler blocker.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="related">
+      <h2>Related projects</h2>
+      <p class="sub">Two open-source projects checked for reuse on 11 Nov 2026.</p>
+      <div class="cards">
+        <article class="card">
+          <span class="tag">turlvo/KuKuHarmony</span>
+          <h3>No help for the 600</h3>
+          <p>A SmartThings SmartApp that triggers devices through a Harmony Hub via the community harmony-api server. It controls an existing Hub setup over the network. It cannot program a remote, and the 600 has no Hub or network link.</p>
+          <p><span class="chip risk">Not applicable</span> Relevant only if a Harmony Hub is added later.</p>
+        </article>
+        <article class="card rec">
+          <span class="tag">harmonic-afterglow/afterglow</span>
+          <h3>Strong reference, not a drop-in</h3>
+          <p>A Python app (GPL-3.0) that builds configurations locally and writes them over USB, made after the May 2025 shutdown. It is the existence proof for proposal C. It supports the Harmony 900 (arch 15), with the One and 1100 experimental. The 600's Molson family (arch 14/16, <code>/cfg/usercfg</code>) is not covered.</p>
+          <ul>
+            <li>Reuse the method: trace real configs, round-trip losslessly, keep unknown bytes as hex</li>
+            <li>Test its IR bytecode docs (<code>IrProto.bin</code>, <code>SsIr.bin</code>) against a 600 backup</li>
+            <li>Option: add a Molson profile to Afterglow instead of building the Studio from zero</li>
+          </ul>
+          <p><span class="chip warn">Licensing</span> Code built on it and shared must also be GPL-3.0.</p>
+        </article>
+      </div>
+      <p>The first Lifeboat backup decides between the two paths. If <code>/cfg/usercfg</code> contains Afterglow's IR container (a 6-byte prefix, a u16 block count, then u16 offsets), extending Afterglow is the shorter route. If it doesn't, the Rosetta harness is still needed and Afterglow stays a design reference.</p>
+    </section>
+
+    <section id="arch">
+      <h2>Target architecture</h2>
+      <p class="sub">Proposal C, with A and B folded in. Nothing in this picture talks to Logitech.</p>
+      <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  subgraph UI["Local Studio (Tauri or browser)"]
+    ED["Device, activity and button editor"]
+    LIB[("Device library<br/>SQLite")]
+    CMP["Config compiler<br/>model to usercfg"]
+    BK["Backup and restore"]
+  end
+  subgraph SRC["Code sources"]
+    EXP["Account export<br/>(proposal B, JSON)"]
+    IRDB["Open IR databases<br/>IRDB, Flipper, LIRC"]
+    LRN["Learned codes<br/>decoded by IrpTransmogrifier"]
+  end
+  EXP --> LIB
+  IRDB --> LIB
+  LRN --> LIB
+  ED --> LIB
+  LIB --> CMP
+  CMP --> DRV["Molson driver<br/>WebHID or hidapi"]
+  BK --> DRV
+  DRV <--> R[("Harmony 600<br/>046D:C122")]
+  R -- "/ir/ir_cap" --> LRN
+</pre>
+      </div>
+      <p class="caption">The driver performs the same file operations as the Logitech plugin: Open, Read, Write, Flush, Close and Reset over 64-byte HID reports.</p>
+      <h3>Transport choice</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Option</th><th>Strengths</th><th>Weak spots</th></tr></thead>
+        <tbody>
+          <tr><td>WebHID page</td><td>Zero install. One HTML file. Edge and Chrome on Windows, macOS and Linux.</td><td>User picks the device each session. No Firefox or Safari.</td></tr>
+          <tr><td>Python + hidapi</td><td>Fastest to prototype. Easy to script backups and diffs.</td><td>Needs Python installed. No GUI by default.</td></tr>
+          <tr><td>Tauri (Rust + hidapi)</td><td>Small native app with a web UI. Good for the full Studio.</td><td>More build setup than the others.</td></tr>
+          <tr><td>libconcord / concordance</td><td>Already written and tested on this family.</td><td>Old C++ codebase. Windows builds are awkward. Config writes expect Logitech-made files.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="sim">
+      <h2>USB simulator</h2>
+      <p class="sub">Step through what a local tool would send to the remote. This is a simulation. No hardware is touched.</p>
+      <div class="sim" id="simulator">
+        <div class="sim-bar">
+          <div class="tabs" role="tablist" aria-label="Scenario">
+            <button role="tab" id="tab-backup" aria-selected="true" data-s="backup">Backup</button>
+            <button role="tab" id="tab-restore" aria-selected="false" data-s="restore">Restore</button>
+            <button role="tab" id="tab-learn" aria-selected="false" data-s="learn">Learn IR</button>
+          </div>
+          <div class="ctl">
+            <button id="btn-step" type="button">Step</button>
+            <button id="btn-run" type="button" class="primary">Run</button>
+            <button id="btn-reset" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="sizer">
+          <label for="cfg-size">Config size</label>
+          <input id="cfg-size" type="range" min="16" max="512" step="16" value="96">
+          <output id="cfg-size-out" for="cfg-size">96 KB</output>
+          <div class="stats">
+            <span>Data packets <b id="st-packets">–</b></span>
+            <span>Acks <b id="st-acks">–</b></span>
+            <span>Est. time <b id="st-time">–</b></span>
+          </div>
+        </div>
+        <div class="progress"><i id="prog"></i></div>
+        <div class="sim-body">
+          <div id="panels"></div>
+          <div class="console" id="console" aria-live="polite"><div class="dim">Press Step or Run to start the Backup scenario.</div></div>
+        </div>
+        <div class="assume">Assumptions: 64-byte reports with 62 bytes of payload, an ack every 50 data packets (both from libconcord), and about 2 ms per report. The real config size of your remote is not known yet. Parameter encodings shown as <code>"text"</code> are logical fields, not exact bytes.</div>
+      </div>
+    </section>
+
+    <section id="harness">
+      <h2>Rosetta harness</h2>
+      <p class="sub">How to learn the config format while Logitech's compiler still answers.</p>
+      <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  A["Make one small change<br/>in MyHarmony"] --> B["Sync through<br/>Logitech cloud"]
+  B --> C["Lifeboat reads<br/>/cfg/usercfg"]
+  C --> D["Diff against<br/>previous snapshot"]
+  D --> E["Record: change<br/>to byte regions"]
+  E --> F{"Pattern clear?"}
+  F -- "no" --> A
+  F -- "yes" --> G["Encode the rule<br/>in local compiler"]
+  G --> H["Verify: local output<br/>equals cloud output"]
+</pre>
+      </div>
+      <p>Each round isolates one variable: rename an activity, add one device, remap one button, change a power setting. Snapshots and their change notes go into the repo. The goal is a compiler whose output matches the cloud's byte for byte on every recorded case. Until it does, the Studio can still write any config you captured earlier.</p>
+      <p>The checksum is already partly known: libconcord sends a finish message with type, seed, length and expected value, and contains an XOR-of-16-bit-words routine with seed <code>0x4321</code>. That should be confirmed against a real capture.</p>
+    </section>
+
+    <section id="roadmap">
+      <h2>Roadmap</h2>
+      <ol class="road">
+        <li><div><span class="when">Week 1</span><b>Lifeboat, read-only first</b><span>Identify the remote and read <code>/cfg/usercfg</code>. Save the file with its SHA-256 and the identity. Do this before anything else.</span></div></li>
+        <li><div><span class="when">Week 1–2</span><b>Account export</b><span>Export devices, IR commands, activities and button maps to JSON while the servers answer.</span></div></li>
+        <li><div><span class="when">Week 2</span><b>Lifeboat restore</b><span>Write the saved file back and confirm the remote still works. This proves the write path and gives a safe undo for every later step.</span></div></li>
+        <li><div><span class="when">Weeks 2–6</span><b>Rosetta rounds</b><span>Collect paired changes and snapshots until the main structures of the config are mapped.</span></div></li>
+        <li><div><span class="when">Weeks 6+</span><b>Local Studio</b><span>Editor, device library and compiler. Ship it when local output matches the recorded cloud output.</span></div></li>
+      </ol>
+    </section>
+
+    <section id="sources">
+      <h2>Sources</h2>
+      <ul style="margin:0;padding-left:18px;display:grid;gap:4px">
+        <li>MyHarmony Teardown (companion page): templates, device table, plugin API</li>
+        <li><a href="https://sources.debian.org/src/concordance/1.5-3.1/libconcord/remote_mh.cpp">libconcord remote_mh.cpp</a>: MH backend, file paths, packet format, checksum</li>
+        <li><a href="https://sources.debian.org/src/concordance/1.5-3.1/libconcord/libusbhid.cpp">libconcord libusbhid.cpp</a>: Logitech PID range 0xC110–0xC14F, which includes 0xC122</li>
+        <li><a href="https://manpages.ubuntu.com/manpages/focal/man1/concordance.1.html">concordance manual</a></li>
+        <li><a href="https://community.openhab.org/t/logitech-killing-harmony-remotes/120609">openHAB forum on the Harmony shutdown</a></li>
+        <li><a href="https://github.com/harmonic-afterglow/afterglow">Afterglow</a> and its <a href="https://github.com/harmonic-afterglow/afterglow/blob/main/docs/harmony_pk/irproto.md">IrProto notes</a></li>
+        <li><a href="https://github.com/turlvo/KuKuHarmony">KuKuHarmony</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Logitech_Harmony">Logitech Harmony on Wikipedia</a>: legacy software support ended 28 May 2025</li>
+        <li><a href="https://github.com/jaymzh/concordance/issues/66">concordance issue #66</a>: harmonyremote.com server shut down</li>
+      </ul>
+    </section>
+
+    <footer>
+      <span>Ratings and timelines are estimates. Simulator values are illustrative and use the stated assumptions.</span>
+      <span>Prepared with Claude. Nothing was written to the remote.</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  var MS_PER_REPORT = 2, PAYLOAD = 62, ACK_EVERY = 50;
+  var sizeEl = document.getElementById('cfg-size');
+  var sizeOut = document.getElementById('cfg-size-out');
+
+  function counts() {
+    var bytes = parseInt(sizeEl.value, 10) * 1024;
+    var packets = Math.ceil(bytes / PAYLOAD);
+    var acks = Math.ceil(packets / ACK_EVERY);
+    var secs = (packets + acks * 2) * MS_PER_REPORT / 1000;
+    return { bytes: bytes, packets: packets, acks: acks, secs: secs };
+  }
+  function fmtTime(s) { return s < 60 ? s.toFixed(1) + ' s' : Math.floor(s / 60) + ' min ' + Math.round(s % 60) + ' s'; }
+
+  function scenarios() {
+    var c = counts();
+    var sizeHex = c.bytes.toString(16).toUpperCase().padStart(8, '0').replace(/(..)(?!$)/g, '$1 ');
+    return {
+      backup: [
+        { d: 'tx', b: 'FF 00 00 00', n: 'Ping. Is the remote awake?' },
+        { d: 'rx', b: 'FF 00 .. 00', n: 'Remote answers.' },
+        { d: 'tx', b: 'FF 01 01 02 · "/sys/sysinfo" · "R"', n: 'Open the identity file for reading.' },
+        { d: 'rx', b: 'FF 01 .. .. .. [handle] .. [size BE32]', n: 'File handle at byte 5, size at byte 7.' },
+        { d: 'tx', b: 'FF 04 02 02 · handle · count', n: 'Read the identity file.' },
+        { d: 'rx', b: 'data packets [seq][len][62 bytes]', n: 'Parse fw_ver, hw_ver, arch, skin, guid, serial_number.' },
+        { d: 'tx', b: 'FF 07 03 01 · handle', n: 'Close it.' },
+        { d: 'tx', b: 'FF 01 04 02 · "/cfg/usercfg" · "R"', n: 'Open the user configuration.' },
+        { d: 'rx', b: 'FF 01 .. size ' + sizeHex, n: 'Config size: ' + (c.bytes / 1024) + ' KB.' },
+        { d: 'tx', b: 'FF 04 05 02 · handle · count', n: 'Start the bulk read.' },
+        { d: 'rx', b: c.packets.toLocaleString('en-US') + ' data packets, ' + c.acks + ' acks', n: 'Stream the file, acknowledging every 50 packets.', bulk: true },
+        { d: 'tx', b: 'FF 07 06 01 · handle', n: 'Close the config file.' },
+        { d: 'pc', b: 'usercfg.bin + identity.json + SHA-256', n: 'Save locally. Nothing on the remote changed.' }
+      ],
+      restore: [
+        { d: 'pc', b: 'load usercfg.bin + identity.json', n: 'Check the SHA-256 of the saved file.' },
+        { d: 'tx', b: 'FF 00 00 00', n: 'Ping.' },
+        { d: 'tx', b: 'FF 01 01 02 · "/sys/sysinfo" · "R"', n: 'Read the identity again.' },
+        { d: 'pc', b: 'compare GUID and skin', n: 'Stop here if this is a different remote.' },
+        { d: 'tx', b: 'FF 01 02 03 · checksum type · "/cfg/usercfg" · "W"', n: 'Open the config for writing.' },
+        { d: 'tx', b: 'FF 03 03 .. · handle · size', n: 'Announce the write.' },
+        { d: 'tx', b: c.packets.toLocaleString('en-US') + ' data packets, ' + c.acks + ' acks', n: 'Stream the file. The remote acks every 50 packets.', bulk: true },
+        { d: 'tx', b: '7E', n: 'End of stream.' },
+        { d: 'tx', b: 'finish · TYPE · SEED · LENGTH · EXPECTEDVALUE', n: 'Checksum check on the remote side.' },
+        { d: 'tx', b: 'FF 05 .. · handle', n: 'Flush. Commit the new config.' },
+        { d: 'tx', b: 'FF 07 .. 01 · handle', n: 'Close.' },
+        { d: 'tx', b: 'FF FF .. ..', n: 'Reset. The remote reboots with the restored setup.' }
+      ],
+      learn: [
+        { d: 'tx', b: 'DevCtrl · start learning', n: 'Put the remote in learning mode.' },
+        { d: 'tx', b: 'FF 01 01 02 · "/ir/ir_cap" · "R"', n: 'Open the IR capture file.' },
+        { d: 'pc', b: 'point the old remote at the Harmony', n: 'Press the button to learn.' },
+        { d: 'rx', b: 'pulse and gap timings', n: 'Raw capture streams back.' },
+        { d: 'tx', b: 'FF 06 .. · stop learning', n: 'Leave learning mode.' },
+        { d: 'tx', b: 'FF 07 .. · handle', n: 'Close the file.' },
+        { d: 'pc', b: 'IrpTransmogrifier decode', n: 'Example result: NEC1 D=4 F=8. Saved to the device library.' }
+      ]
+    };
+  }
+
+  var current = 'backup', pos = -1, timer = null, data = scenarios();
+  var panels = document.getElementById('panels');
+  var con = document.getElementById('console');
+  var prog = document.getElementById('prog');
+
+  function renderPanels() {
+    data = scenarios();
+    panels.innerHTML = '';
+    Object.keys(data).forEach(function (k) {
+      var ol = document.createElement('ol');
+      ol.className = 'steps panel';
+      ol.id = 'panel-' + k;
+      ol.setAttribute('aria-label', k + ' steps');
+      ol.hidden = k !== current;
+      data[k].forEach(function (s, i) {
+        var li = document.createElement('li');
+        li.innerHTML = '<span class="dir ' + s.d + '">' + ({ tx: 'PC→', rx: '←RC', pc: 'PC' })[s.d] + '</span>' +
+          '<span class="bytes"></span><span class="note"></span>';
+        li.querySelector('.bytes').textContent = s.b;
+        li.querySelector('.note').textContent = s.n;
+        ol.appendChild(li);
+      });
+      panels.appendChild(ol);
+    });
+    paint();
+  }
+  function stats() {
+    var c = counts();
+    sizeOut.textContent = sizeEl.value + ' KB';
+    document.getElementById('st-packets').textContent = c.packets.toLocaleString('en-US');
+    document.getElementById('st-acks').textContent = c.acks.toLocaleString('en-US');
+    document.getElementById('st-time').textContent = current === 'learn' ? 'n/a' : '~' + fmtTime(c.secs);
+  }
+  function paint() {
+    var lis = document.querySelectorAll('#panel-' + current + ' li');
+    lis.forEach(function (li, i) { li.classList.toggle('cur', i === pos); li.classList.toggle('done', i < pos); });
+    prog.style.width = lis.length ? Math.max(0, (pos + 1) / lis.length * 100) + '%' : '0';
+    stats();
+  }
+  function log(text, dim) {
+    var d = document.createElement('div');
+    if (dim) d.className = 'dim';
+    d.textContent = text;
+    con.appendChild(d);
+    con.scrollTop = con.scrollHeight;
+  }
+  function step() {
+    var steps = data[current];
+    if (pos >= steps.length - 1) { stop(); return false; }
+    pos++;
+    var s = steps[pos];
+    log(({ tx: 'PC → remote  ', rx: 'remote → PC  ', pc: 'local        ' })[s.d] + s.b);
+    log('             ' + s.n, true);
+    if (s.bulk) {
+      var c = counts();
+      log('             ' + (c.bytes / 1024) + ' KB in ' + c.packets.toLocaleString('en-US') + ' reports, ~' + fmtTime(c.secs), true);
+    }
+    paint();
+    if (pos === steps.length - 1) { log('Done.', false); stop(); }
+    return true;
+  }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } document.getElementById('btn-run').textContent = 'Run'; }
+  function reset() {
+    stop(); pos = -1; con.innerHTML = '';
+    log('Scenario: ' + current + '. Press Step or Run.', true);
+    paint();
+  }
+  function select(k) {
+    current = k;
+    document.querySelectorAll('.tabs button').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.s === k)); });
+    document.querySelectorAll('.panel').forEach(function (p) { p.hidden = p.id !== 'panel-' + k; });
+    reset();
+  }
+
+  document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { select(b.dataset.s); }); });
+  document.getElementById('btn-step').addEventListener('click', step);
+  document.getElementById('btn-reset').addEventListener('click', reset);
+  document.getElementById('btn-run').addEventListener('click', function () {
+    if (timer) { stop(); return; }
+    if (pos >= data[current].length - 1) reset();
+    this.textContent = 'Pause';
+    var fast = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    timer = setInterval(step, fast ? 80 : 650);
+  });
+  sizeEl.addEventListener('input', function () { var keep = pos; renderPanels(); pos = keep; paint(); });
+
+  // Static view for saved copies: show every scenario's steps.
+  window.__staticExport = function () {
+    stop();
+    document.querySelectorAll('.panel').forEach(function (p) {
+      p.hidden = false;
+      var h = document.createElement('li');
+      h.style.cssText = 'display:block;font:600 11px/1.4 var(--f-body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding-top:14px';
+      h.textContent = p.id.replace('panel-', '') + ' scenario';
+      p.insertBefore(h, p.firstChild);
+    });
+    document.querySelector('.sim-bar .ctl').remove();
+    document.querySelector('.tabs').remove();
+    con.innerHTML = '<div class="dim">Saved copy: the interactive simulator runs on the online page. All three scenarios are listed on the left.</div>';
+  };
+
+  renderPanels();
+  reset();
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"neutral",securityLevel:"loose"});mermaid.run({querySelector:"pre.mermaid"}).then(function(){document.documentElement.dataset.rendered="1"});</script>
+</body>
+</html>

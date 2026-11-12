@@ -1,0 +1,1545 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: http://127.0.0.1:8765/plan.html
+Subject: Harmony Offline Plan
+Date: Thu, 12 Nov 2026 11:05:09 GMT
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--mV2V6unOvInWDWRcs3YaYdYIGu5M1hRFflWI2NLNH3----"
+
+
+------MultipartBoundary--mV2V6unOvInWDWRcs3YaYdYIGu5M1hRFflWI2NLNH3----
+Content-Type: text/html
+Content-ID: <frame-78666E7C4D67EF12B44BE8817772EA55@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://127.0.0.1:8765/plan.html
+
+<!DOCTYPE html><html lang=3D"en" data-theme=3D"light"><head><meta http-equi=
+v=3D"Content-Type" content=3D"text/html; charset=3DUTF-8"><link rel=3D"styl=
+esheet" type=3D"text/css" href=3D"cid:css-767f823e-d1e3-40a6-9993-4e004f134=
+c39@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:c=
+ss-d424f570-3754-4c4a-b6ff-29d66bbee1f2@mhtml.blink" />
+
+<meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=3D1,=
+ viewport-fit=3Dcover">
+<title>Harmony Offline Plan</title>
+<meta name=3D"claude:viewport-fit-sides" content=3D"cover">
+<link rel=3D"stylesheet" href=3D"https://fonts.googleapis.com/css2?family=
+=3DIBM+Plex+Mono:wght@400;500;600&amp;family=3DIBM+Plex+Sans:wght@400;500;6=
+00&amp;family=3DSpace+Grotesk:wght@500;600&amp;display=3Dswap">
+
+
+</head>
+<body>
+
+<div class=3D"wrap">
+  <nav class=3D"toc" aria-label=3D"Contents">
+    <div class=3D"lbl">Contents</div>
+    <a href=3D"http://127.0.0.1:8765/plan.html#verdict">Verdict</a>
+    <a href=3D"http://127.0.0.1:8765/plan.html#map">Cloud dependencies</a>
+    <a href=3D"http://127.0.0.1:8765/plan.html#proposals">Proposals</a>
+    <a href=3D"http://127.0.0.1:8765/plan.html#related">Related projects</a=
+>
+    <a href=3D"http://127.0.0.1:8765/plan.html#arch">Target architecture</a=
+>
+    <a href=3D"http://127.0.0.1:8765/plan.html#sim">USB simulator</a>
+    <a href=3D"http://127.0.0.1:8765/plan.html#harness">Rosetta harness</a>
+    <a href=3D"http://127.0.0.1:8765/plan.html#roadmap">Roadmap</a>
+    <a href=3D"http://127.0.0.1:8765/plan.html#sources">Sources</a>
+  </nav>
+
+  <main>
+    <header class=3D"hero">
+      <div class=3D"eyebrow">Harmony-remote-assistant =C2=B7 feasibility st=
+udy =C2=B7 11 Nov 2026</div>
+      <h1>Running a Harmony 600 without Logitech's servers</h1>
+      <p class=3D"lede">An assessment of whether the MyHarmony workflow can=
+ run entirely on your own machine, four ways to get there, and a simulation=
+ of the USB exchange a local tool would perform. Companion to the MyHarmony=
+ Teardown page.</p>
+    </header>
+
+    <section id=3D"verdict">
+      <h2>Verdict</h2>
+      <div class=3D"verdict">
+        <div class=3D"big">Yes, in stages. Backup, restore and IR learning =
+can go fully local now. Editing the setup locally needs one piece reverse-e=
+ngineered first.</div>
+        <div class=3D"meter">
+          <div class=3D"ok"><b>USB side: solved</b><span>The protocol scrip=
+ts ship inside the app, and the open-source libconcord already reads and wr=
+ites this remote family's config.</span></div>
+          <div class=3D"ok"><b>Transport: modern</b><span>WebHID in Edge an=
+d Chrome, or hidapi from Python, Rust or Node, can reach the vendor-defined=
+ HID interface with no driver install.</span></div>
+          <div class=3D"warn"><b>Device codes: partial</b><span>Your own de=
+vices can be exported now. New devices come from open IR databases or from =
+learning with the remote itself.</span></div>
+          <div class=3D"risk"><b>Config compiler: unknown</b><span>Logitech=
+'s server turns devices and activities into <code>/cfg/usercfg</code>. Its =
+format is undocumented. That is the one real blocker.</span></div>
+        </div>
+        <p style=3D"margin:0">The clock matters. Logitech shut down the old=
+er Harmony Remote Software service on 28 May 2025, which stranded the 900, =
+One and 1100. The MyHarmony service your 600 uses still answered on 11 Nov =
+2026. While it does, it can act as an oracle: every change you make and syn=
+c shows exactly how the config bytes change.</p>
+      </div>
+    </section>
+
+    <section id=3D"map">
+      <h2>Cloud dependencies</h2>
+      <p class=3D"sub">Everything the cloud does today, and what would repl=
+ace it locally.</p>
+      <div class=3D"tbl"><table>
+        <thead><tr><th>Cloud function today</th><th>Local replacement</th><=
+th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Sign-in, account, household</td><td>Not needed. A single =
+local profile file.</td><td><span class=3D"chip ok">Easy</span></td></tr>
+          <tr><td>USB protocol scripts (<code>IRomDataLibrary</code>)</td><=
+td>Already embedded in <code>Web.Driver.dll</code>. libconcord's <code>remo=
+te_mh.cpp</code> implements the same exchange.</td><td><span class=3D"chip =
+ok">Available</span></td></tr>
+          <tr><td>Remote identity</td><td>Read <code>/sys/sysinfo</code>: f=
+irmware, hardware, arch, skin, GUID, serial.</td><td><span class=3D"chip ok=
+">Available</span></td></tr>
+          <tr><td>Your devices and their IR codes</td><td>Export from your =
+account now, while the API answers.</td><td><span class=3D"chip warn">Do so=
+on</span></td></tr>
+          <tr><td>Logitech's device database</td><td>Open databases (IRDB, =
+Flipper-IRDB, LIRC) plus learning from original remotes.</td><td><span clas=
+s=3D"chip warn">Partial</span></td></tr>
+          <tr><td>IR analysis (<code>AnalyzeInfrared</code>)</td><td>Local =
+decoding with IrpTransmogrifier (the engine behind IrScrutinizer).</td><td>=
+<span class=3D"chip ok">Available</span></td></tr>
+          <tr><td>Activities, button maps, sequences</td><td>Local editor a=
+nd data model (SQLite or JSON).</td><td><span class=3D"chip ok">Build</span=
+></td></tr>
+          <tr><td>Compile to remote config (<code>ICompileManager</code>)</=
+td><td>A local compiler that writes <code>/cfg/usercfg</code>. Needs the fo=
+rmat reverse-engineered.</td><td><span class=3D"chip risk">Blocker</span></=
+td></tr>
+          <tr><td>Firmware updates</td><td>Leave the current firmware alone=
+. Not needed for daily use.</td><td><span class=3D"chip ok">Skip</span></td=
+></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id=3D"proposals">
+      <h2>Proposals</h2>
+      <p class=3D"sub">Four options, ranked. The first three build on each =
+other. Ratings are judgment calls, from 1 to 5.</p>
+      <div class=3D"cards">
+        <article class=3D"card rec">
+          <span class=3D"tag">A =C2=B7 Lifeboat</span>
+          <h3>Backup and restore</h3>
+          <p>A small local tool that reads the remote's identity and config=
+ file and writes it back. It protects the setup you have today, permanently=
+.</p>
+          <ul>
+            <li>Single-file WebHID web page, or a Python script on <code>hi=
+dapi</code></li>
+            <li>Uses only operations libconcord already performs</li>
+            <li>Refuses to restore onto a remote with a different GUID</li>
+          </ul>
+          <dl class=3D"scores">
+            <dt>Feasibility</dt><dd><i class=3D"pip on"></i><i class=3D"pip=
+ on"></i><i class=3D"pip on"></i><i class=3D"pip on"></i><i class=3D"pip on=
+"></i></dd>
+            <dt>Effort</dt><dd><i class=3D"pip on"></i><i class=3D"pip"></i=
+><i class=3D"pip"></i><i class=3D"pip"></i><i class=3D"pip"></i><small>days=
+</small></dd>
+            <dt>Risk to remote</dt><dd class=3D"risk"><i class=3D"pip on"><=
+/i><i class=3D"pip on"></i><i class=3D"pip"></i><i class=3D"pip"></i><i cla=
+ss=3D"pip"></i><small>low, read first</small></dd>
+          </dl>
+        </article>
+
+        <article class=3D"card rec">
+          <span class=3D"tag">B =C2=B7 Export</span>
+          <h3>Account export</h3>
+          <p>A one-time export of everything your account holds: devices wi=
+th their IR commands, activities, button maps and sequences, saved as JSON.=
+</p>
+          <ul>
+            <li>Replays the app's own SOAP calls with your signed-in sessio=
+n</li>
+            <li>Keeps your data usable after the servers close</li>
+            <li>Feeds the device library in proposal C</li>
+          </ul>
+          <dl class=3D"scores">
+            <dt>Feasibility</dt><dd><i class=3D"pip on"></i><i class=3D"pip=
+ on"></i><i class=3D"pip on"></i><i class=3D"pip on"></i><i class=3D"pip"><=
+/i></dd>
+            <dt>Effort</dt><dd><i class=3D"pip on"></i><i class=3D"pip on">=
+</i><i class=3D"pip"></i><i class=3D"pip"></i><i class=3D"pip"></i><small>d=
+ays</small></dd>
+            <dt>Risk to remote</dt><dd class=3D"risk"><i class=3D"pip"></i>=
+<i class=3D"pip"></i><i class=3D"pip"></i><i class=3D"pip"></i><i class=3D"=
+pip"></i><small>none</small></dd>
+          </dl>
+        </article>
+
+        <article class=3D"card">
+          <span class=3D"tag">C =C2=B7 Local Studio</span>
+          <h3>Full local replacement</h3>
+          <p>A modern desktop app with its own device library, activity and=
+ button editor, and a local compiler that writes the remote's config over U=
+SB.</p>
+          <ul>
+            <li>Tauri or a WebHID web app, with SQLite storage</li>
+            <li>Compiler built with the Rosetta harness below</li>
+            <li>Works offline forever once the format is known</li>
+          </ul>
+          <dl class=3D"scores">
+            <dt>Feasibility</dt><dd><i class=3D"pip on"></i><i class=3D"pip=
+ on"></i><i class=3D"pip on"></i><i class=3D"pip"></i><i class=3D"pip"></i>=
+<small>gated on format</small></dd>
+            <dt>Effort</dt><dd><i class=3D"pip on"></i><i class=3D"pip on">=
+</i><i class=3D"pip on"></i><i class=3D"pip on"></i><i class=3D"pip"></i><s=
+mall>weeks to months</small></dd>
+            <dt>Risk to remote</dt><dd class=3D"risk"><i class=3D"pip on"><=
+/i><i class=3D"pip on"></i><i class=3D"pip on"></i><i class=3D"pip"></i><i =
+class=3D"pip"></i><small>medium, A undoes it</small></dd>
+          </dl>
+        </article>
+
+        <article class=3D"card">
+          <span class=3D"tag">D =C2=B7 Replay shim</span>
+          <h3>Fake the cloud for the old app</h3>
+          <p>Point <code>setup.myharmony.com</code> at a local HTTPS server=
+ that serves cached app packages and recorded answers, so the existing MyHa=
+rmony UI keeps loading.</p>
+          <ul>
+            <li>Needs a hosts-file entry and a locally trusted certificate<=
+/li>
+            <li>Still cannot compile new configs, so edits fail</li>
+            <li>Keeps a 2013 browser and Silverlight in use</li>
+          </ul>
+          <dl class=3D"scores">
+            <dt>Feasibility</dt><dd><i class=3D"pip on"></i><i class=3D"pip=
+ on"></i><i class=3D"pip"></i><i class=3D"pip"></i><i class=3D"pip"></i></d=
+d>
+            <dt>Effort</dt><dd><i class=3D"pip on"></i><i class=3D"pip on">=
+</i><i class=3D"pip on"></i><i class=3D"pip"></i><i class=3D"pip"></i><smal=
+l>weeks</small></dd>
+            <dt>Risk to remote</dt><dd class=3D"risk"><i class=3D"pip on"><=
+/i><i class=3D"pip on"></i><i class=3D"pip"></i><i class=3D"pip"></i><i cla=
+ss=3D"pip"></i></dd>
+          </dl>
+          <p><span class=3D"chip risk">Not recommended</span> It keeps the =
+weakest parts of the old stack and still hits the same compiler blocker.</p=
+>
+        </article>
+      </div>
+    </section>
+
+    <section id=3D"related">
+      <h2>Related projects</h2>
+      <p class=3D"sub">Two open-source projects checked for reuse on 11 Nov=
+ 2026.</p>
+      <div class=3D"cards">
+        <article class=3D"card">
+          <span class=3D"tag">turlvo/KuKuHarmony</span>
+          <h3>No help for the 600</h3>
+          <p>A SmartThings SmartApp that triggers devices through a Harmony=
+ Hub via the community harmony-api server. It controls an existing Hub setu=
+p over the network. It cannot program a remote, and the 600 has no Hub or n=
+etwork link.</p>
+          <p><span class=3D"chip risk">Not applicable</span> Relevant only =
+if a Harmony Hub is added later.</p>
+        </article>
+        <article class=3D"card rec">
+          <span class=3D"tag">harmonic-afterglow/afterglow</span>
+          <h3>Strong reference, not a drop-in</h3>
+          <p>A Python app (GPL-3.0) that builds configurations locally and =
+writes them over USB, made after the May 2025 shutdown. It is the existence=
+ proof for proposal C. It supports the Harmony 900 (arch 15), with the One =
+and 1100 experimental. The 600's Molson family (arch 14/16, <code>/cfg/user=
+cfg</code>) is not covered.</p>
+          <ul>
+            <li>Reuse the method: trace real configs, round-trip losslessly=
+, keep unknown bytes as hex</li>
+            <li>Test its IR bytecode docs (<code>IrProto.bin</code>, <code>=
+SsIr.bin</code>) against a 600 backup</li>
+            <li>Option: add a Molson profile to Afterglow instead of buildi=
+ng the Studio from zero</li>
+          </ul>
+          <p><span class=3D"chip warn">Licensing</span> Code built on it an=
+d shared must also be GPL-3.0.</p>
+        </article>
+      </div>
+      <p>The first Lifeboat backup decides between the two paths. If <code>=
+/cfg/usercfg</code> contains Afterglow's IR container (a 6-byte prefix, a u=
+16 block count, then u16 offsets), extending Afterglow is the shorter route=
+. If it doesn't, the Rosetta harness is still needed and Afterglow stays a =
+design reference.</p>
+    </section>
+
+    <section id=3D"arch">
+      <h2>Target architecture</h2>
+      <p class=3D"sub">Proposal C, with A and B folded in. Nothing in this =
+picture talks to Logitech.</p>
+      <div class=3D"diagram">
+<pre class=3D"mermaid" data-processed=3D"true"><svg id=3D"mermaid-179448150=
+9529" width=3D"100%" xmlns=3D"http://www.w3.org/2000/svg" xmlns:xlink=3D"ht=
+tp://www.w3.org/1999/xlink" style=3D"max-width: 1411.78125px;" viewBox=3D"-=
+8 -8 1411.78125 577.1141967773438" role=3D"graphics-document document" aria=
+-roledescription=3D"flowchart-v2"><style>#mermaid-1794481509529{font-family=
+:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#000000;}#merm=
+aid-1794481509529 .error-icon{fill:#552222;}#mermaid-1794481509529 .error-t=
+ext{fill:#552222;stroke:#552222;}#mermaid-1794481509529 .edge-thickness-nor=
+mal{stroke-width:2px;}#mermaid-1794481509529 .edge-thickness-thick{stroke-w=
+idth:3.5px;}#mermaid-1794481509529 .edge-pattern-solid{stroke-dasharray:0;}=
+#mermaid-1794481509529 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-17=
+94481509529 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-1794481509529=
+ .marker{fill:#666;stroke:#666;}#mermaid-1794481509529 .marker.cross{stroke=
+:#666;}#mermaid-1794481509529 svg{font-family:"trebuchet ms",verdana,arial,=
+sans-serif;font-size:16px;}#mermaid-1794481509529 .label{font-family:"trebu=
+chet ms",verdana,arial,sans-serif;color:#000000;}#mermaid-1794481509529 .cl=
+uster-label text{fill:#333;}#mermaid-1794481509529 .cluster-label span,#mer=
+maid-1794481509529 p{color:#333;}#mermaid-1794481509529 .label text,#mermai=
+d-1794481509529 span,#mermaid-1794481509529 p{fill:#000000;color:#000000;}#=
+mermaid-1794481509529 .node rect,#mermaid-1794481509529 .node circle,#merma=
+id-1794481509529 .node ellipse,#mermaid-1794481509529 .node polygon,#mermai=
+d-1794481509529 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mermaid=
+-1794481509529 .flowchart-label text{text-anchor:middle;}#mermaid-179448150=
+9529 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-179=
+4481509529 .node .label{text-align:center;}#mermaid-1794481509529 .node.cli=
+ckable{cursor:pointer;}#mermaid-1794481509529 .arrowheadPath{fill:#333333;}=
+#mermaid-1794481509529 .edgePath .path{stroke:#666;stroke-width:2.0px;}#mer=
+maid-1794481509529 .flowchart-link{stroke:#666;fill:none;}#mermaid-17944815=
+09529 .edgeLabel{background-color:white;text-align:center;}#mermaid-1794481=
+509529 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#merm=
+aid-1794481509529 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mer=
+maid-1794481509529 .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#70=
+7070;stroke-width:1px;}#mermaid-1794481509529 .cluster text{fill:#333;}#mer=
+maid-1794481509529 .cluster span,#mermaid-1794481509529 p{color:#333;}#merm=
+aid-1794481509529 div.mermaidTooltip{position:absolute;text-align:center;ma=
+x-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-ser=
+if;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid=
+ #707070;border-radius:2px;pointer-events:none;z-index:100;}#mermaid-179448=
+1509529 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;=
+}#mermaid-1794481509529 :root{--mermaid-font-family:"trebuchet ms",verdana,=
+arial,sans-serif;}</style><g><marker id=3D"mermaid-1794481509529_flowchart-=
+pointEnd" class=3D"marker flowchart" viewBox=3D"0 0 10 10" refX=3D"6" refY=
+=3D"5" markerUnits=3D"userSpaceOnUse" markerWidth=3D"12" markerHeight=3D"12=
+" orient=3D"auto"><path d=3D"M 0 0 L 10 5 L 0 10 z" class=3D"arrowMarkerPat=
+h" style=3D"stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><mark=
+er id=3D"mermaid-1794481509529_flowchart-pointStart" class=3D"marker flowch=
+art" viewBox=3D"0 0 10 10" refX=3D"4.5" refY=3D"5" markerUnits=3D"userSpace=
+OnUse" markerWidth=3D"12" markerHeight=3D"12" orient=3D"auto"><path d=3D"M =
+0 5 L 10 10 L 10 0 z" class=3D"arrowMarkerPath" style=3D"stroke-width: 1; s=
+troke-dasharray: 1, 0;"></path></marker><marker id=3D"mermaid-1794481509529=
+_flowchart-circleEnd" class=3D"marker flowchart" viewBox=3D"0 0 10 10" refX=
+=3D"11" refY=3D"5" markerUnits=3D"userSpaceOnUse" markerWidth=3D"11" marker=
+Height=3D"11" orient=3D"auto"><circle cx=3D"5" cy=3D"5" r=3D"5" class=3D"ar=
+rowMarkerPath" style=3D"stroke-width: 1; stroke-dasharray: 1, 0;"></circle>=
+</marker><marker id=3D"mermaid-1794481509529_flowchart-circleStart" class=
+=3D"marker flowchart" viewBox=3D"0 0 10 10" refX=3D"-1" refY=3D"5" markerUn=
+its=3D"userSpaceOnUse" markerWidth=3D"11" markerHeight=3D"11" orient=3D"aut=
+o"><circle cx=3D"5" cy=3D"5" r=3D"5" class=3D"arrowMarkerPath" style=3D"str=
+oke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id=3D"merm=
+aid-1794481509529_flowchart-crossEnd" class=3D"marker cross flowchart" view=
+Box=3D"0 0 11 11" refX=3D"12" refY=3D"5.2" markerUnits=3D"userSpaceOnUse" m=
+arkerWidth=3D"11" markerHeight=3D"11" orient=3D"auto"><path d=3D"M 1,1 l 9,=
+9 M 10,1 l -9,9" class=3D"arrowMarkerPath" style=3D"stroke-width: 2; stroke=
+-dasharray: 1, 0;"></path></marker><marker id=3D"mermaid-1794481509529_flow=
+chart-crossStart" class=3D"marker cross flowchart" viewBox=3D"0 0 11 11" re=
+fX=3D"-1" refY=3D"5.2" markerUnits=3D"userSpaceOnUse" markerWidth=3D"11" ma=
+rkerHeight=3D"11" orient=3D"auto"><path d=3D"M 1,1 l 9,9 M 10,1 l -9,9" cla=
+ss=3D"arrowMarkerPath" style=3D"stroke-width: 2; stroke-dasharray: 1, 0;"><=
+/path></marker><g class=3D"root"><g class=3D"clusters"><g class=3D"cluster =
+default flowchart-label" id=3D"SRC"><rect style=3D"" rx=3D"0" ry=3D"0" x=3D=
+"0" y=3D"308.73919677734375" width=3D"1395.78125" height=3D"252.375"></rect=
+><g class=3D"cluster-label" transform=3D"translate(651.0078125, 308.7391967=
+7734375)"><foreignObject width=3D"93.765625" height=3D"25.59375"><div xmlns=
+=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-spa=
+ce: nowrap;"><span class=3D"nodeLabel">Code sources</span></div></foreignOb=
+ject></g></g><g class=3D"cluster default flowchart-label" id=3D"UI"><rect s=
+tyle=3D"" rx=3D"0" ry=3D"0" x=3D"0" y=3D"0" width=3D"676.15625" height=3D"2=
+88.73919677734375"></rect><g class=3D"cluster-label" transform=3D"translate=
+(227.734375, 0)"><foreignObject width=3D"220.6875" height=3D"25.59375"><div=
+ xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; whi=
+te-space: nowrap;"><span class=3D"nodeLabel">Local Studio (Tauri or browser=
+)</span></div></foreignObject></g></g></g><g class=3D"edgePaths"><path d=3D=
+"M228.578,376.833L241.932,376.833C255.286,376.833,281.995,376.833,305.568,3=
+49.309C329.141,321.784,349.579,266.735,359.798,239.211L370.018,211.687" id=
+=3D"L-EXP-LIB-0" class=3D" edge-thickness-normal edge-pattern-solid flowcha=
+rt-link LS-EXP LE-LIB" style=3D"fill:none;" marker-end=3D"url(#mermaid-1794=
+481509529_flowchart-pointEnd)"></path><path d=3D"M228.672,493.02L242.01,493=
+.02C255.349,493.02,282.026,493.02,306.776,446.227C331.525,399.434,354.347,3=
+05.847,365.758,259.054L377.169,212.26" id=3D"L-IRDB-LIB-0" class=3D" edge-t=
+hickness-normal edge-pattern-solid flowchart-link LS-IRDB LE-LIB" style=3D"=
+fill:none;" marker-end=3D"url(#mermaid-1794481509529_flowchart-pointEnd)"><=
+/path><path d=3D"M1145.563,450.525L1135.397,451.933C1125.232,453.341,1104.9=
+01,456.157,1075.521,457.565C1046.141,458.974,1007.711,458.974,975.28,458.97=
+4C942.849,458.974,916.417,458.974,887.465,458.974C858.513,458.974,827.042,4=
+58.974,795.57,458.974C764.099,458.974,732.628,458.974,712.725,421.767C692.8=
+23,384.561,684.49,310.149,663.397,272.943C642.305,235.737,608.453,235.737,5=
+74.602,235.737C540.75,235.737,506.898,235.737,485.642,230.467C464.386,225.1=
+97,455.724,214.658,451.394,209.388L447.063,204.118" id=3D"L-LRN-LIB-0" clas=
+s=3D" edge-thickness-normal edge-pattern-solid flowchart-link LS-LRN LE-LIB=
+" style=3D"fill:none;" marker-end=3D"url(#mermaid-1794481509529_flowchart-p=
+ointEnd)"></path><path d=3D"M283.703,156.393L287.87,156.393C292.036,156.393=
+,300.37,156.393,307.82,156.393C315.27,156.393,321.836,156.393,325.12,156.39=
+3L328.403,156.393" id=3D"L-ED-LIB-0" class=3D" edge-thickness-normal edge-p=
+attern-solid flowchart-link LS-ED LE-LIB" style=3D"fill:none;" marker-end=
+=3D"url(#mermaid-1794481509529_flowchart-pointEnd)"></path><path d=3D"M443.=
+698,112.763L448.589,106.81C453.481,100.858,463.264,88.954,472.879,83.002C48=
+2.494,77.049,491.941,77.049,496.664,77.049L501.388,77.049" id=3D"L-LIB-CMP-=
+0" class=3D" edge-thickness-normal edge-pattern-solid flowchart-link LS-LIB=
+ LE-CMP" style=3D"fill:none;" marker-end=3D"url(#mermaid-1794481509529_flow=
+chart-pointEnd)"></path><path d=3D"M642.516,77.049L648.122,77.049C653.729,7=
+7.049,664.943,77.049,674.716,77.049C684.49,77.049,692.823,77.049,701.877,79=
+.725C710.931,82.401,720.706,87.753,725.593,90.429L730.481,93.105" id=3D"L-C=
+MP-DRV-0" class=3D" edge-thickness-normal edge-pattern-solid flowchart-link=
+ LS-CMP LE-DRV" style=3D"fill:none;" marker-end=3D"url(#mermaid-17944815095=
+29_flowchart-pointEnd)"></path><path d=3D"M651.156,180.44L655.323,180.44C65=
+9.49,180.44,667.823,180.44,676.156,180.44C684.49,180.44,692.823,180.44,701.=
+877,177.764C710.931,175.088,720.706,169.736,725.593,167.06L730.481,164.384"=
+ id=3D"L-BK-DRV-0" class=3D" edge-thickness-normal edge-pattern-solid flowc=
+hart-link LS-BK LE-DRV" style=3D"fill:none;" marker-end=3D"url(#mermaid-179=
+4481509529_flowchart-pointEnd)"></path><path d=3D"M870.284,128.745L873.568,=
+128.745C876.851,128.745,883.418,128.745,889.984,128.745C896.551,128.745,903=
+.118,128.745,906.401,128.745L909.684,128.745" id=3D"L-DRV-R-0" class=3D" ed=
+ge-thickness-normal edge-pattern-solid flowchart-link LS-DRV LE-R" style=3D=
+"fill:none;" marker-start=3D"url(#mermaid-1794481509529_flowchart-pointStar=
+t)" marker-end=3D"url(#mermaid-1794481509529_flowchart-pointEnd)"></path><p=
+ath d=3D"M989.469,178.434L1005.319,218.242C1021.169,258.049,1052.87,337.664=
+,1078.007,378.415C1103.143,419.166,1121.717,421.055,1131.003,421.999L1140.2=
+9,422.943" id=3D"L-R-LRN-0" class=3D" edge-thickness-normal edge-pattern-so=
+lid flowchart-link LS-R LE-LRN" style=3D"fill:none;" marker-end=3D"url(#mer=
+maid-1794481509529_flowchart-pointEnd)"></path></g><g class=3D"edgeLabels">=
+<g class=3D"edgeLabel"><g class=3D"label" transform=3D"translate(0, 0)"><fo=
+reignObject width=3D"0" height=3D"0"><div xmlns=3D"http://www.w3.org/1999/x=
+html" style=3D"display: inline-block; white-space: nowrap;"><span class=3D"=
+edgeLabel"></span></div></foreignObject></g></g><g class=3D"edgeLabel"><g c=
+lass=3D"label" transform=3D"translate(0, 0)"><foreignObject width=3D"0" hei=
+ght=3D"0"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inl=
+ine-block; white-space: nowrap;"><span class=3D"edgeLabel"></span></div></f=
+oreignObject></g></g><g class=3D"edgeLabel"><g class=3D"label" transform=3D=
+"translate(0, 0)"><foreignObject width=3D"0" height=3D"0"><div xmlns=3D"htt=
+p://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-space: now=
+rap;"><span class=3D"edgeLabel"></span></div></foreignObject></g></g><g cla=
+ss=3D"edgeLabel"><g class=3D"label" transform=3D"translate(0, 0)"><foreignO=
+bject width=3D"0" height=3D"0"><div xmlns=3D"http://www.w3.org/1999/xhtml" =
+style=3D"display: inline-block; white-space: nowrap;"><span class=3D"edgeLa=
+bel"></span></div></foreignObject></g></g><g class=3D"edgeLabel"><g class=
+=3D"label" transform=3D"translate(0, 0)"><foreignObject width=3D"0" height=
+=3D"0"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline=
+-block; white-space: nowrap;"><span class=3D"edgeLabel"></span></div></fore=
+ignObject></g></g><g class=3D"edgeLabel"><g class=3D"label" transform=3D"tr=
+anslate(0, 0)"><foreignObject width=3D"0" height=3D"0"><div xmlns=3D"http:/=
+/www.w3.org/1999/xhtml" style=3D"display: inline-block; white-space: nowrap=
+;"><span class=3D"edgeLabel"></span></div></foreignObject></g></g><g class=
+=3D"edgeLabel"><g class=3D"label" transform=3D"translate(0, 0)"><foreignObj=
+ect width=3D"0" height=3D"0"><div xmlns=3D"http://www.w3.org/1999/xhtml" st=
+yle=3D"display: inline-block; white-space: nowrap;"><span class=3D"edgeLabe=
+l"></span></div></foreignObject></g></g><g class=3D"edgeLabel"><g class=3D"=
+label" transform=3D"translate(0, 0)"><foreignObject width=3D"0" height=3D"0=
+"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-bloc=
+k; white-space: nowrap;"><span class=3D"edgeLabel"></span></div></foreignOb=
+ject></g></g><g class=3D"edgeLabel" transform=3D"translate(1084.5703125, 41=
+7.27825927734375)"><g class=3D"label" transform=3D"translate(-35.9921875, -=
+12.796875)"><foreignObject width=3D"71.984375" height=3D"25.59375"><div xml=
+ns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-s=
+pace: nowrap;"><span class=3D"edgeLabel">/ir/ir_cap</span></div></foreignOb=
+ject></g></g></g><g class=3D"nodes"><g class=3D"node default default flowch=
+art-label" id=3D"flowchart-EXP-4" data-node=3D"true" data-id=3D"EXP" transf=
+orm=3D"translate(154.3515625, 376.83294677734375)"><rect class=3D"basic lab=
+el-container" style=3D"" rx=3D"0" ry=3D"0" x=3D"-74.2265625" y=3D"-33.09375=
+" width=3D"148.453125" height=3D"66.1875"></rect><g class=3D"label" style=
+=3D"" transform=3D"translate(-66.7265625, -25.59375)"><rect></rect><foreign=
+Object width=3D"133.453125" height=3D"51.1875"><div xmlns=3D"http://www.w3.=
+org/1999/xhtml" style=3D"display: inline-block; white-space: nowrap;"><span=
+ class=3D"nodeLabel">Account export<br>(proposal B, JSON)</span></div></for=
+eignObject></g></g><g class=3D"node default default flowchart-label" id=3D"=
+flowchart-IRDB-5" data-node=3D"true" data-id=3D"IRDB" transform=3D"translat=
+e(154.3515625, 493.02044677734375)"><rect class=3D"basic label-container" s=
+tyle=3D"" rx=3D"0" ry=3D"0" x=3D"-74.3203125" y=3D"-33.09375" width=3D"148.=
+640625" height=3D"66.1875"></rect><g class=3D"label" style=3D"" transform=
+=3D"translate(-66.8203125, -25.59375)"><rect></rect><foreignObject width=3D=
+"133.640625" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml"=
+ style=3D"display: inline-block; white-space: nowrap;"><span class=3D"nodeL=
+abel">Open IR databases<br>IRDB, Flipper, LIRC</span></div></foreignObject>=
+</g></g><g class=3D"node default default flowchart-label" id=3D"flowchart-L=
+RN-6" data-node=3D"true" data-id=3D"LRN" transform=3D"translate(1258.171875=
+, 434.92669677734375)"><rect class=3D"basic label-container" style=3D"" rx=
+=3D"0" ry=3D"0" x=3D"-112.609375" y=3D"-33.09375" width=3D"225.21875" heigh=
+t=3D"66.1875"></rect><g class=3D"label" style=3D"" transform=3D"translate(-=
+105.109375, -25.59375)"><rect></rect><foreignObject width=3D"210.21875" hei=
+ght=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"displa=
+y: inline-block; white-space: nowrap;"><span class=3D"nodeLabel">Learned co=
+des<br>decoded by IrpTransmogrifier</span></div></foreignObject></g></g><g =
+class=3D"node default default flowchart-label" id=3D"flowchart-ED-0" data-n=
+ode=3D"true" data-id=3D"ED" transform=3D"translate(154.3515625, 156.3930358=
+8867188)"><rect class=3D"basic label-container" style=3D"" rx=3D"0" ry=3D"0=
+" x=3D"-129.3515625" y=3D"-20.296875" width=3D"258.703125" height=3D"40.593=
+75"></rect><g class=3D"label" style=3D"" transform=3D"translate(-121.851562=
+5, -12.796875)"><rect></rect><foreignObject width=3D"243.703125" height=3D"=
+25.59375"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inl=
+ine-block; white-space: nowrap;"><span class=3D"nodeLabel">Device, activity=
+ and button editor</span></div></foreignObject></g></g><g class=3D"node def=
+ault default flowchart-label" id=3D"flowchart-LIB-1" label-offset-y=3D"11.9=
+4346520433477" data-node=3D"true" data-id=3D"LIB" transform=3D"translate(39=
+0.875, 156.39303588867188)"><path style=3D"" d=3D"M 0,11.94346520433477 a 5=
+7.171875,11.94346520433477 0,0,0 114.34375 0 a 57.171875,11.94346520433477 =
+0,0,0 -114.34375 0 l 0,78.13096520433477 a 57.171875,11.94346520433477 0,0,=
+0 114.34375 0 l 0,-78.13096520433477" transform=3D"translate(-57.171875,-51=
+.00894780650216)"></path><g class=3D"label" style=3D"" transform=3D"transla=
+te(-49.671875, -25.59375)"><rect></rect><foreignObject width=3D"99.34375" h=
+eight=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"disp=
+lay: inline-block; white-space: nowrap;"><span class=3D"nodeLabel">Device l=
+ibrary<br>SQLite</span></div></foreignObject></g></g><g class=3D"node defau=
+lt default flowchart-label" id=3D"flowchart-CMP-2" data-node=3D"true" data-=
+id=3D"CMP" transform=3D"translate(574.6015625, 77.04928588867188)"><rect cl=
+ass=3D"basic label-container" style=3D"" rx=3D"0" ry=3D"0" x=3D"-67.9140625=
+" y=3D"-33.09375" width=3D"135.828125" height=3D"66.1875"></rect><g class=
+=3D"label" style=3D"" transform=3D"translate(-60.4140625, -25.59375)"><rect=
+></rect><foreignObject width=3D"120.828125" height=3D"51.1875"><div xmlns=
+=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-spa=
+ce: nowrap;"><span class=3D"nodeLabel">Config compiler<br>model to usercfg<=
+/span></div></foreignObject></g></g><g class=3D"node default default flowch=
+art-label" id=3D"flowchart-BK-3" data-node=3D"true" data-id=3D"BK" transfor=
+m=3D"translate(574.6015625, 180.43991088867188)"><rect class=3D"basic label=
+-container" style=3D"" rx=3D"0" ry=3D"0" x=3D"-76.5546875" y=3D"-20.296875"=
+ width=3D"153.109375" height=3D"40.59375"></rect><g class=3D"label" style=
+=3D"" transform=3D"translate(-69.0546875, -12.796875)"><rect></rect><foreig=
+nObject width=3D"138.109375" height=3D"25.59375"><div xmlns=3D"http://www.w=
+3.org/1999/xhtml" style=3D"display: inline-block; white-space: nowrap;"><sp=
+an class=3D"nodeLabel">Backup and restore</span></div></foreignObject></g><=
+/g><g class=3D"node default default flowchart-label" id=3D"flowchart-DRV-18=
+" data-node=3D"true" data-id=3D"DRV" transform=3D"translate(795.5703125, 12=
+8.74459838867188)"><rect class=3D"basic label-container" style=3D"" rx=3D"0=
+" ry=3D"0" x=3D"-69.4140625" y=3D"-33.09375" width=3D"138.828125" height=3D=
+"66.1875"></rect><g class=3D"label" style=3D"" transform=3D"translate(-61.9=
+140625, -25.59375)"><rect></rect><foreignObject width=3D"123.828125" height=
+=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: =
+inline-block; white-space: nowrap;"><span class=3D"nodeLabel">Molson driver=
+<br>WebHID or hidapi</span></div></foreignObject></g></g><g class=3D"node d=
+efault default flowchart-label" id=3D"flowchart-R-22" label-offset-y=3D"11.=
+622073578595318" data-node=3D"true" data-id=3D"R" transform=3D"translate(96=
+9.28125, 128.74459838867188)"><path style=3D"" d=3D"M 0,11.622073578595318 =
+a 54.296875,11.622073578595318 0,0,0 108.59375 0 a 54.296875,11.62207357859=
+5318 0,0,0 -108.59375 0 l 0,77.80957357859532 a 54.296875,11.62207357859531=
+8 0,0,0 108.59375 0 l 0,-77.80957357859532" transform=3D"translate(-54.2968=
+75,-50.52686036789298)"></path><g class=3D"label" style=3D"" transform=3D"t=
+ranslate(-46.796875, -25.59375)"><rect></rect><foreignObject width=3D"93.59=
+375" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=
+=3D"display: inline-block; white-space: nowrap;"><span class=3D"nodeLabel">=
+Harmony 600<br>046D:C122</span></div></foreignObject></g></g></g></g></g></=
+svg></pre>
+      </div>
+      <p class=3D"caption">The driver performs the same file operations as =
+the Logitech plugin: Open, Read, Write, Flush, Close and Reset over 64-byte=
+ HID reports.</p>
+      <h3>Transport choice</h3>
+      <div class=3D"tbl"><table>
+        <thead><tr><th>Option</th><th>Strengths</th><th>Weak spots</th></tr=
+></thead>
+        <tbody>
+          <tr><td>WebHID page</td><td>Zero install. One HTML file. Edge and=
+ Chrome on Windows, macOS and Linux.</td><td>User picks the device each ses=
+sion. No Firefox or Safari.</td></tr>
+          <tr><td>Python + hidapi</td><td>Fastest to prototype. Easy to scr=
+ipt backups and diffs.</td><td>Needs Python installed. No GUI by default.</=
+td></tr>
+          <tr><td>Tauri (Rust + hidapi)</td><td>Small native app with a web=
+ UI. Good for the full Studio.</td><td>More build setup than the others.</t=
+d></tr>
+          <tr><td>libconcord / concordance</td><td>Already written and test=
+ed on this family.</td><td>Old C++ codebase. Windows builds are awkward. Co=
+nfig writes expect Logitech-made files.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id=3D"sim">
+      <h2>USB simulator</h2>
+      <p class=3D"sub">Step through what a local tool would send to the rem=
+ote. This is a simulation. No hardware is touched.</p>
+      <div class=3D"sim" id=3D"simulator">
+        <div class=3D"sim-bar">
+         =20
+         =20
+        </div>
+        <div class=3D"sizer">
+          <label for=3D"cfg-size">Config size</label>
+          <input id=3D"cfg-size" type=3D"range" min=3D"16" max=3D"512" step=
+=3D"16" value=3D"96">
+          <output id=3D"cfg-size-out" for=3D"cfg-size">96 KB</output>
+          <div class=3D"stats">
+            <span>Data packets <b id=3D"st-packets">1,586</b></span>
+            <span>Acks <b id=3D"st-acks">32</b></span>
+            <span>Est. time <b id=3D"st-time">~3.3 s</b></span>
+          </div>
+        </div>
+        <div class=3D"progress"><i id=3D"prog" style=3D"width: 0%;"></i></d=
+iv>
+        <div class=3D"sim-body">
+          <div id=3D"panels"><ol class=3D"steps panel" id=3D"panel-backup" =
+aria-label=3D"backup steps"><li style=3D"display: block; font: 600 11px/1.4=
+ var(--f-body); letter-spacing: 0.07em; text-transform: uppercase; color: v=
+ar(--muted); padding-top: 14px;">backup scenario</li><li class=3D""><span c=
+lass=3D"dir tx">PC=E2=86=92</span><span class=3D"bytes">FF 00 00 00</span><=
+span class=3D"note">Ping. Is the remote awake?</span></li><li class=3D""><s=
+pan class=3D"dir rx">=E2=86=90RC</span><span class=3D"bytes">FF 00 .. 00</s=
+pan><span class=3D"note">Remote answers.</span></li><li class=3D""><span cl=
+ass=3D"dir tx">PC=E2=86=92</span><span class=3D"bytes">FF 01 01 02 =C2=B7 "=
+/sys/sysinfo" =C2=B7 "R"</span><span class=3D"note">Open the identity file =
+for reading.</span></li><li class=3D""><span class=3D"dir rx">=E2=86=90RC</=
+span><span class=3D"bytes">FF 01 .. .. .. [handle] .. [size BE32]</span><sp=
+an class=3D"note">File handle at byte 5, size at byte 7.</span></li><li><sp=
+an class=3D"dir tx">PC=E2=86=92</span><span class=3D"bytes">FF 04 02 02 =C2=
+=B7 handle =C2=B7 count</span><span class=3D"note">Read the identity file.<=
+/span></li><li><span class=3D"dir rx">=E2=86=90RC</span><span class=3D"byte=
+s">data packets [seq][len][62 bytes]</span><span class=3D"note">Parse fw_ve=
+r, hw_ver, arch, skin, guid, serial_number.</span></li><li><span class=3D"d=
+ir tx">PC=E2=86=92</span><span class=3D"bytes">FF 07 03 01 =C2=B7 handle</s=
+pan><span class=3D"note">Close it.</span></li><li><span class=3D"dir tx">PC=
+=E2=86=92</span><span class=3D"bytes">FF 01 04 02 =C2=B7 "/cfg/usercfg" =C2=
+=B7 "R"</span><span class=3D"note">Open the user configuration.</span></li>=
+<li><span class=3D"dir rx">=E2=86=90RC</span><span class=3D"bytes">FF 01 ..=
+ size 00 01 80 00</span><span class=3D"note">Config size: 96 KB.</span></li=
+><li><span class=3D"dir tx">PC=E2=86=92</span><span class=3D"bytes">FF 04 0=
+5 02 =C2=B7 handle =C2=B7 count</span><span class=3D"note">Start the bulk r=
+ead.</span></li><li><span class=3D"dir rx">=E2=86=90RC</span><span class=3D=
+"bytes">1,586 data packets, 32 acks</span><span class=3D"note">Stream the f=
+ile, acknowledging every 50 packets.</span></li><li><span class=3D"dir tx">=
+PC=E2=86=92</span><span class=3D"bytes">FF 07 06 01 =C2=B7 handle</span><sp=
+an class=3D"note">Close the config file.</span></li><li><span class=3D"dir =
+pc">PC</span><span class=3D"bytes">usercfg.bin + identity.json + SHA-256</s=
+pan><span class=3D"note">Save locally. Nothing on the remote changed.</span=
+></li></ol><ol class=3D"steps panel" id=3D"panel-restore" aria-label=3D"res=
+tore steps"><li style=3D"display: block; font: 600 11px/1.4 var(--f-body); =
+letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); pad=
+ding-top: 14px;">restore scenario</li><li><span class=3D"dir pc">PC</span><=
+span class=3D"bytes">load usercfg.bin + identity.json</span><span class=3D"=
+note">Check the SHA-256 of the saved file.</span></li><li><span class=3D"di=
+r tx">PC=E2=86=92</span><span class=3D"bytes">FF 00 00 00</span><span class=
+=3D"note">Ping.</span></li><li><span class=3D"dir tx">PC=E2=86=92</span><sp=
+an class=3D"bytes">FF 01 01 02 =C2=B7 "/sys/sysinfo" =C2=B7 "R"</span><span=
+ class=3D"note">Read the identity again.</span></li><li><span class=3D"dir =
+pc">PC</span><span class=3D"bytes">compare GUID and skin</span><span class=
+=3D"note">Stop here if this is a different remote.</span></li><li><span cla=
+ss=3D"dir tx">PC=E2=86=92</span><span class=3D"bytes">FF 01 02 03 =C2=B7 ch=
+ecksum type =C2=B7 "/cfg/usercfg" =C2=B7 "W"</span><span class=3D"note">Ope=
+n the config for writing.</span></li><li><span class=3D"dir tx">PC=E2=86=92=
+</span><span class=3D"bytes">FF 03 03 .. =C2=B7 handle =C2=B7 size</span><s=
+pan class=3D"note">Announce the write.</span></li><li><span class=3D"dir tx=
+">PC=E2=86=92</span><span class=3D"bytes">1,586 data packets, 32 acks</span=
+><span class=3D"note">Stream the file. The remote acks every 50 packets.</s=
+pan></li><li><span class=3D"dir tx">PC=E2=86=92</span><span class=3D"bytes"=
+>7E</span><span class=3D"note">End of stream.</span></li><li><span class=3D=
+"dir tx">PC=E2=86=92</span><span class=3D"bytes">finish =C2=B7 TYPE =C2=B7 =
+SEED =C2=B7 LENGTH =C2=B7 EXPECTEDVALUE</span><span class=3D"note">Checksum=
+ check on the remote side.</span></li><li><span class=3D"dir tx">PC=E2=86=
+=92</span><span class=3D"bytes">FF 05 .. =C2=B7 handle</span><span class=3D=
+"note">Flush. Commit the new config.</span></li><li><span class=3D"dir tx">=
+PC=E2=86=92</span><span class=3D"bytes">FF 07 .. 01 =C2=B7 handle</span><sp=
+an class=3D"note">Close.</span></li><li><span class=3D"dir tx">PC=E2=86=92<=
+/span><span class=3D"bytes">FF FF .. ..</span><span class=3D"note">Reset. T=
+he remote reboots with the restored setup.</span></li></ol><ol class=3D"ste=
+ps panel" id=3D"panel-learn" aria-label=3D"learn steps"><li style=3D"displa=
+y: block; font: 600 11px/1.4 var(--f-body); letter-spacing: 0.07em; text-tr=
+ansform: uppercase; color: var(--muted); padding-top: 14px;">learn scenario=
+</li><li><span class=3D"dir tx">PC=E2=86=92</span><span class=3D"bytes">Dev=
+Ctrl =C2=B7 start learning</span><span class=3D"note">Put the remote in lea=
+rning mode.</span></li><li><span class=3D"dir tx">PC=E2=86=92</span><span c=
+lass=3D"bytes">FF 01 01 02 =C2=B7 "/ir/ir_cap" =C2=B7 "R"</span><span class=
+=3D"note">Open the IR capture file.</span></li><li><span class=3D"dir pc">P=
+C</span><span class=3D"bytes">point the old remote at the Harmony</span><sp=
+an class=3D"note">Press the button to learn.</span></li><li><span class=3D"=
+dir rx">=E2=86=90RC</span><span class=3D"bytes">pulse and gap timings</span=
+><span class=3D"note">Raw capture streams back.</span></li><li><span class=
+=3D"dir tx">PC=E2=86=92</span><span class=3D"bytes">FF 06 .. =C2=B7 stop le=
+arning</span><span class=3D"note">Leave learning mode.</span></li><li><span=
+ class=3D"dir tx">PC=E2=86=92</span><span class=3D"bytes">FF 07 .. =C2=B7 h=
+andle</span><span class=3D"note">Close the file.</span></li><li><span class=
+=3D"dir pc">PC</span><span class=3D"bytes">IrpTransmogrifier decode</span><=
+span class=3D"note">Example result: NEC1 D=3D4 F=3D8. Saved to the device l=
+ibrary.</span></li></ol></div>
+          <div class=3D"console" id=3D"console" aria-live=3D"polite"><div c=
+lass=3D"dim">Saved copy: the interactive simulator runs on the online page.=
+ All three scenarios are listed on the left.</div></div>
+        </div>
+        <div class=3D"assume">Assumptions: 64-byte reports with 62 bytes of=
+ payload, an ack every 50 data packets (both from libconcord), and about 2 =
+ms per report. The real config size of your remote is not known yet. Parame=
+ter encodings shown as <code>"text"</code> are logical fields, not exact by=
+tes.</div>
+      </div>
+    </section>
+
+    <section id=3D"harness">
+      <h2>Rosetta harness</h2>
+      <p class=3D"sub">How to learn the config format while Logitech's comp=
+iler still answers.</p>
+      <div class=3D"diagram">
+<pre class=3D"mermaid" data-processed=3D"true"><svg id=3D"mermaid-179448150=
+9667" width=3D"100%" xmlns=3D"http://www.w3.org/2000/svg" xmlns:xlink=3D"ht=
+tp://www.w3.org/1999/xlink" style=3D"max-width: 1540.046875px;" viewBox=3D"=
+-8 -8 1540.046875 171.234375" role=3D"graphics-document document" aria-role=
+description=3D"flowchart-v2"><style>#mermaid-1794481509667{font-family:"tre=
+buchet ms",verdana,arial,sans-serif;font-size:16px;fill:#000000;}#mermaid-1=
+794481509667 .error-icon{fill:#552222;}#mermaid-1794481509667 .error-text{f=
+ill:#552222;stroke:#552222;}#mermaid-1794481509667 .edge-thickness-normal{s=
+troke-width:2px;}#mermaid-1794481509667 .edge-thickness-thick{stroke-width:=
+3.5px;}#mermaid-1794481509667 .edge-pattern-solid{stroke-dasharray:0;}#merm=
+aid-1794481509667 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-1794481=
+509667 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-1794481509667 .mar=
+ker{fill:#666;stroke:#666;}#mermaid-1794481509667 .marker.cross{stroke:#666=
+;}#mermaid-1794481509667 svg{font-family:"trebuchet ms",verdana,arial,sans-=
+serif;font-size:16px;}#mermaid-1794481509667 .label{font-family:"trebuchet =
+ms",verdana,arial,sans-serif;color:#000000;}#mermaid-1794481509667 .cluster=
+-label text{fill:#333;}#mermaid-1794481509667 .cluster-label span,#mermaid-=
+1794481509667 p{color:#333;}#mermaid-1794481509667 .label text,#mermaid-179=
+4481509667 span,#mermaid-1794481509667 p{fill:#000000;color:#000000;}#merma=
+id-1794481509667 .node rect,#mermaid-1794481509667 .node circle,#mermaid-17=
+94481509667 .node ellipse,#mermaid-1794481509667 .node polygon,#mermaid-179=
+4481509667 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mermaid-1794=
+481509667 .flowchart-label text{text-anchor:middle;}#mermaid-1794481509667 =
+.node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-17944815=
+09667 .node .label{text-align:center;}#mermaid-1794481509667 .node.clickabl=
+e{cursor:pointer;}#mermaid-1794481509667 .arrowheadPath{fill:#333333;}#merm=
+aid-1794481509667 .edgePath .path{stroke:#666;stroke-width:2.0px;}#mermaid-=
+1794481509667 .flowchart-link{stroke:#666;fill:none;}#mermaid-1794481509667=
+ .edgeLabel{background-color:white;text-align:center;}#mermaid-179448150966=
+7 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mermaid-1=
+794481509667 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mermaid-=
+1794481509667 .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;=
+stroke-width:1px;}#mermaid-1794481509667 .cluster text{fill:#333;}#mermaid-=
+1794481509667 .cluster span,#mermaid-1794481509667 p{color:#333;}#mermaid-1=
+794481509667 div.mermaidTooltip{position:absolute;text-align:center;max-wid=
+th:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;fo=
+nt-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707=
+070;border-radius:2px;pointer-events:none;z-index:100;}#mermaid-17944815096=
+67 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mer=
+maid-1794481509667 :root{--mermaid-font-family:"trebuchet ms",verdana,arial=
+,sans-serif;}</style><g><marker id=3D"mermaid-1794481509667_flowchart-point=
+End" class=3D"marker flowchart" viewBox=3D"0 0 10 10" refX=3D"6" refY=3D"5"=
+ markerUnits=3D"userSpaceOnUse" markerWidth=3D"12" markerHeight=3D"12" orie=
+nt=3D"auto"><path d=3D"M 0 0 L 10 5 L 0 10 z" class=3D"arrowMarkerPath" sty=
+le=3D"stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id=
+=3D"mermaid-1794481509667_flowchart-pointStart" class=3D"marker flowchart" =
+viewBox=3D"0 0 10 10" refX=3D"4.5" refY=3D"5" markerUnits=3D"userSpaceOnUse=
+" markerWidth=3D"12" markerHeight=3D"12" orient=3D"auto"><path d=3D"M 0 5 L=
+ 10 10 L 10 0 z" class=3D"arrowMarkerPath" style=3D"stroke-width: 1; stroke=
+-dasharray: 1, 0;"></path></marker><marker id=3D"mermaid-1794481509667_flow=
+chart-circleEnd" class=3D"marker flowchart" viewBox=3D"0 0 10 10" refX=3D"1=
+1" refY=3D"5" markerUnits=3D"userSpaceOnUse" markerWidth=3D"11" markerHeigh=
+t=3D"11" orient=3D"auto"><circle cx=3D"5" cy=3D"5" r=3D"5" class=3D"arrowMa=
+rkerPath" style=3D"stroke-width: 1; stroke-dasharray: 1, 0;"></circle></mar=
+ker><marker id=3D"mermaid-1794481509667_flowchart-circleStart" class=3D"mar=
+ker flowchart" viewBox=3D"0 0 10 10" refX=3D"-1" refY=3D"5" markerUnits=3D"=
+userSpaceOnUse" markerWidth=3D"11" markerHeight=3D"11" orient=3D"auto"><cir=
+cle cx=3D"5" cy=3D"5" r=3D"5" class=3D"arrowMarkerPath" style=3D"stroke-wid=
+th: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id=3D"mermaid-179=
+4481509667_flowchart-crossEnd" class=3D"marker cross flowchart" viewBox=3D"=
+0 0 11 11" refX=3D"12" refY=3D"5.2" markerUnits=3D"userSpaceOnUse" markerWi=
+dth=3D"11" markerHeight=3D"11" orient=3D"auto"><path d=3D"M 1,1 l 9,9 M 10,=
+1 l -9,9" class=3D"arrowMarkerPath" style=3D"stroke-width: 2; stroke-dashar=
+ray: 1, 0;"></path></marker><marker id=3D"mermaid-1794481509667_flowchart-c=
+rossStart" class=3D"marker cross flowchart" viewBox=3D"0 0 11 11" refX=3D"-=
+1" refY=3D"5.2" markerUnits=3D"userSpaceOnUse" markerWidth=3D"11" markerHei=
+ght=3D"11" orient=3D"auto"><path d=3D"M 1,1 l 9,9 M 10,1 l -9,9" class=3D"a=
+rrowMarkerPath" style=3D"stroke-width: 2; stroke-dasharray: 1, 0;"></path><=
+/marker><g class=3D"root"><g class=3D"clusters"></g><g class=3D"edgePaths">=
+<path d=3D"M180.25,50.964L184.417,49.732C188.583,48.499,196.917,46.035,204.=
+367,44.803C211.817,43.57,218.383,43.57,221.667,43.57L224.95,43.57" id=3D"L-=
+A-B-0" class=3D" edge-thickness-normal edge-pattern-solid flowchart-link LS=
+-A LE-B" style=3D"fill:none;" marker-end=3D"url(#mermaid-1794481509667_flow=
+chart-pointEnd)"></path><path d=3D"M349.969,43.57L354.135,43.57C358.302,43.=
+57,366.635,43.57,374.085,43.57C381.535,43.57,388.102,43.57,391.385,43.57L39=
+4.669,43.57" id=3D"L-B-C-0" class=3D" edge-thickness-normal edge-pattern-so=
+lid flowchart-link LS-B LE-C" style=3D"fill:none;" marker-end=3D"url(#merma=
+id-1794481509667_flowchart-pointEnd)"></path><path d=3D"M518.094,43.57L523.=
+704,43.57C529.315,43.57,540.536,43.57,550.874,43.57C561.213,43.57,570.667,4=
+3.57,575.395,43.57L580.122,43.57" id=3D"L-C-D-0" class=3D" edge-thickness-n=
+ormal edge-pattern-solid flowchart-link LS-C LE-D" style=3D"fill:none;" mar=
+ker-end=3D"url(#mermaid-1794481509667_flowchart-pointEnd)"></path><path d=
+=3D"M728,43.57L732.167,43.57C736.333,43.57,744.667,43.57,752.117,43.57C759.=
+567,43.57,766.133,43.57,769.417,43.57L772.7,43.57" id=3D"L-D-E-0" class=3D"=
+ edge-thickness-normal edge-pattern-solid flowchart-link LS-D LE-E" style=
+=3D"fill:none;" marker-end=3D"url(#mermaid-1794481509667_flowchart-pointEnd=
+)"></path><path d=3D"M903.297,43.57L907.464,43.57C911.63,43.57,919.964,43.5=
+7,930.766,45.822C941.569,48.073,954.842,52.575,961.478,54.827L968.114,57.07=
+8" id=3D"L-E-F-0" class=3D" edge-thickness-normal edge-pattern-solid flowch=
+art-link LS-E LE-F" style=3D"fill:none;" marker-end=3D"url(#mermaid-1794481=
+509667_flowchart-pointEnd)"></path><path d=3D"M973.134,97.454L965.661,99.82=
+2C958.188,102.191,943.242,106.927,921.162,109.296C899.081,111.664,869.865,1=
+11.664,840.648,111.664C811.432,111.664,782.216,111.664,751.56,111.664C720.9=
+04,111.664,688.807,111.664,655.267,111.664C621.727,111.664,586.742,111.664,=
+553.796,111.664C520.849,111.664,489.94,111.664,460.475,111.664C431.01,111.6=
+64,402.99,111.664,374.836,111.664C346.682,111.664,318.396,111.664,290.109,1=
+11.664C261.823,111.664,233.536,111.664,216.074,110.682C198.611,109.701,191.=
+972,107.737,188.652,106.755L185.332,105.774" id=3D"L-F-A-0" class=3D" edge-=
+thickness-normal edge-pattern-solid flowchart-link LS-F LE-A" style=3D"fill=
+:none;" marker-end=3D"url(#mermaid-1794481509667_flowchart-pointEnd)"></pat=
+h><path d=3D"M1109.031,78.117L1115.039,78.034C1121.047,77.951,1133.063,77.7=
+84,1144.278,77.701C1155.494,77.617,1165.909,77.617,1171.117,77.617L1176.325=
+,77.617" id=3D"L-F-G-0" class=3D" edge-thickness-normal edge-pattern-solid =
+flowchart-link LS-F LE-G" style=3D"fill:none;" marker-end=3D"url(#mermaid-1=
+794481509667_flowchart-pointEnd)"></path><path d=3D"M1316.859,77.617L1321.0=
+26,77.617C1325.193,77.617,1333.526,77.617,1340.976,77.617C1348.426,77.617,1=
+354.993,77.617,1358.276,77.617L1361.559,77.617" id=3D"L-G-H-0" class=3D" ed=
+ge-thickness-normal edge-pattern-solid flowchart-link LS-G LE-H" style=3D"f=
+ill:none;" marker-end=3D"url(#mermaid-1794481509667_flowchart-pointEnd)"></=
+path></g><g class=3D"edgeLabels"><g class=3D"edgeLabel"><g class=3D"label" =
+transform=3D"translate(0, 0)"><foreignObject width=3D"0" height=3D"0"><div =
+xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; whit=
+e-space: nowrap;"><span class=3D"edgeLabel"></span></div></foreignObject></=
+g></g><g class=3D"edgeLabel"><g class=3D"label" transform=3D"translate(0, 0=
+)"><foreignObject width=3D"0" height=3D"0"><div xmlns=3D"http://www.w3.org/=
+1999/xhtml" style=3D"display: inline-block; white-space: nowrap;"><span cla=
+ss=3D"edgeLabel"></span></div></foreignObject></g></g><g class=3D"edgeLabel=
+"><g class=3D"label" transform=3D"translate(0, 0)"><foreignObject width=3D"=
+0" height=3D"0"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"displa=
+y: inline-block; white-space: nowrap;"><span class=3D"edgeLabel"></span></d=
+iv></foreignObject></g></g><g class=3D"edgeLabel"><g class=3D"label" transf=
+orm=3D"translate(0, 0)"><foreignObject width=3D"0" height=3D"0"><div xmlns=
+=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-spa=
+ce: nowrap;"><span class=3D"edgeLabel"></span></div></foreignObject></g></g=
+><g class=3D"edgeLabel"><g class=3D"label" transform=3D"translate(0, 0)"><f=
+oreignObject width=3D"0" height=3D"0"><div xmlns=3D"http://www.w3.org/1999/=
+xhtml" style=3D"display: inline-block; white-space: nowrap;"><span class=3D=
+"edgeLabel"></span></div></foreignObject></g></g><g class=3D"edgeLabel" tra=
+nsform=3D"translate(551.7578125, 111.6640625)"><g class=3D"label" transform=
+=3D"translate(-8.6640625, -12.796875)"><foreignObject width=3D"17.328125" h=
+eight=3D"25.59375"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"dis=
+play: inline-block; white-space: nowrap;"><span class=3D"edgeLabel">no</spa=
+n></div></foreignObject></g></g><g class=3D"edgeLabel" transform=3D"transla=
+te(1145.078125, 77.6171875)"><g class=3D"label" transform=3D"translate(-11.=
+546875, -12.796875)"><foreignObject width=3D"23.09375" height=3D"25.59375">=
+<div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block;=
+ white-space: nowrap;"><span class=3D"edgeLabel">yes</span></div></foreignO=
+bject></g></g><g class=3D"edgeLabel"><g class=3D"label" transform=3D"transl=
+ate(0, 0)"><foreignObject width=3D"0" height=3D"0"><div xmlns=3D"http://www=
+.w3.org/1999/xhtml" style=3D"display: inline-block; white-space: nowrap;"><=
+span class=3D"edgeLabel"></span></div></foreignObject></g></g></g><g class=
+=3D"nodes"><g class=3D"node default default flowchart-label" id=3D"flowchar=
+t-A-27" data-node=3D"true" data-id=3D"A" transform=3D"translate(90.125, 77.=
+6171875)"><rect class=3D"basic label-container" style=3D"" rx=3D"0" ry=3D"0=
+" x=3D"-90.125" y=3D"-33.09375" width=3D"180.25" height=3D"66.1875"></rect>=
+<g class=3D"label" style=3D"" transform=3D"translate(-82.625, -25.59375)"><=
+rect></rect><foreignObject width=3D"165.25" height=3D"51.1875"><div xmlns=
+=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-spa=
+ce: nowrap;"><span class=3D"nodeLabel">Make one small change<br>in MyHarmon=
+y</span></div></foreignObject></g></g><g class=3D"node default default flow=
+chart-label" id=3D"flowchart-B-28" data-node=3D"true" data-id=3D"B" transfo=
+rm=3D"translate(290.109375, 43.5703125)"><rect class=3D"basic label-contain=
+er" style=3D"" rx=3D"0" ry=3D"0" x=3D"-59.859375" y=3D"-33.09375" width=3D"=
+119.71875" height=3D"66.1875"></rect><g class=3D"label" style=3D"" transfor=
+m=3D"translate(-52.359375, -25.59375)"><rect></rect><foreignObject width=3D=
+"104.71875" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml" =
+style=3D"display: inline-block; white-space: nowrap;"><span class=3D"nodeLa=
+bel">Sync through<br>Logitech cloud</span></div></foreignObject></g></g><g =
+class=3D"node default default flowchart-label" id=3D"flowchart-C-30" data-n=
+ode=3D"true" data-id=3D"C" transform=3D"translate(459.03125, 43.5703125)"><=
+rect class=3D"basic label-container" style=3D"" rx=3D"0" ry=3D"0" x=3D"-59.=
+0625" y=3D"-33.09375" width=3D"118.125" height=3D"66.1875"></rect><g class=
+=3D"label" style=3D"" transform=3D"translate(-51.5625, -25.59375)"><rect></=
+rect><foreignObject width=3D"103.125" height=3D"51.1875"><div xmlns=3D"http=
+://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-space: nowr=
+ap;"><span class=3D"nodeLabel">Lifeboat reads<br>/cfg/usercfg</span></div><=
+/foreignObject></g></g><g class=3D"node default default flowchart-label" id=
+=3D"flowchart-D-32" data-node=3D"true" data-id=3D"D" transform=3D"translate=
+(656.7109375, 43.5703125)"><rect class=3D"basic label-container" style=3D""=
+ rx=3D"0" ry=3D"0" x=3D"-71.2890625" y=3D"-33.09375" width=3D"142.578125" h=
+eight=3D"66.1875"></rect><g class=3D"label" style=3D"" transform=3D"transla=
+te(-63.7890625, -25.59375)"><rect></rect><foreignObject width=3D"127.578125=
+" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"d=
+isplay: inline-block; white-space: nowrap;"><span class=3D"nodeLabel">Diff =
+against<br>previous snapshot</span></div></foreignObject></g></g><g class=
+=3D"node default default flowchart-label" id=3D"flowchart-E-34" data-node=
+=3D"true" data-id=3D"E" transform=3D"translate(840.6484375, 43.5703125)"><r=
+ect class=3D"basic label-container" style=3D"" rx=3D"0" ry=3D"0" x=3D"-62.6=
+484375" y=3D"-33.09375" width=3D"125.296875" height=3D"66.1875"></rect><g c=
+lass=3D"label" style=3D"" transform=3D"translate(-55.1484375, -25.59375)"><=
+rect></rect><foreignObject width=3D"110.296875" height=3D"51.1875"><div xml=
+ns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-s=
+pace: nowrap;"><span class=3D"nodeLabel">Record: change<br>to byte regions<=
+/span></div></foreignObject></g></g><g class=3D"node default default flowch=
+art-label" id=3D"flowchart-F-36" data-node=3D"true" data-id=3D"F" transform=
+=3D"translate(1030.9140625, 77.6171875)"><polygon points=3D"77.6171875,0 15=
+5.234375,-77.6171875 77.6171875,-155.234375 0,-77.6171875" class=3D"label-c=
+ontainer" transform=3D"translate(-77.6171875,77.6171875)" style=3D""></poly=
+gon><g class=3D"label" style=3D"" transform=3D"translate(-49.8203125, -12.7=
+96875)"><rect></rect><foreignObject width=3D"99.640625" height=3D"25.59375"=
+><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block=
+; white-space: nowrap;"><span class=3D"nodeLabel">Pattern clear?</span></di=
+v></foreignObject></g></g><g class=3D"node default default flowchart-label"=
+ id=3D"flowchart-G-40" data-node=3D"true" data-id=3D"G" transform=3D"transl=
+ate(1249.2421875, 77.6171875)"><rect class=3D"basic label-container" style=
+=3D"" rx=3D"0" ry=3D"0" x=3D"-67.6171875" y=3D"-33.09375" width=3D"135.2343=
+75" height=3D"66.1875"></rect><g class=3D"label" style=3D"" transform=3D"tr=
+anslate(-60.1171875, -25.59375)"><rect></rect><foreignObject width=3D"120.2=
+34375" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=
+=3D"display: inline-block; white-space: nowrap;"><span class=3D"nodeLabel">=
+Encode the rule<br>in local compiler</span></div></foreignObject></g></g><g=
+ class=3D"node default default flowchart-label" id=3D"flowchart-H-42" data-=
+node=3D"true" data-id=3D"H" transform=3D"translate(1445.453125, 77.6171875)=
+"><rect class=3D"basic label-container" style=3D"" rx=3D"0" ry=3D"0" x=3D"-=
+78.59375" y=3D"-33.09375" width=3D"157.1875" height=3D"66.1875"></rect><g c=
+lass=3D"label" style=3D"" transform=3D"translate(-71.09375, -25.59375)"><re=
+ct></rect><foreignObject width=3D"142.1875" height=3D"51.1875"><div xmlns=
+=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-spa=
+ce: nowrap;"><span class=3D"nodeLabel">Verify: local output<br>equals cloud=
+ output</span></div></foreignObject></g></g></g></g></g></svg></pre>
+      </div>
+      <p>Each round isolates one variable: rename an activity, add one devi=
+ce, remap one button, change a power setting. Snapshots and their change no=
+tes go into the repo. The goal is a compiler whose output matches the cloud=
+'s byte for byte on every recorded case. Until it does, the Studio can stil=
+l write any config you captured earlier.</p>
+      <p>The checksum is already partly known: libconcord sends a finish me=
+ssage with type, seed, length and expected value, and contains an XOR-of-16=
+-bit-words routine with seed <code>0x4321</code>. That should be confirmed =
+against a real capture.</p>
+    </section>
+
+    <section id=3D"roadmap">
+      <h2>Roadmap</h2>
+      <ol class=3D"road">
+        <li><div><span class=3D"when">Week 1</span><b>Lifeboat, read-only f=
+irst</b><span>Identify the remote and read <code>/cfg/usercfg</code>. Save =
+the file with its SHA-256 and the identity. Do this before anything else.</=
+span></div></li>
+        <li><div><span class=3D"when">Week 1=E2=80=932</span><b>Account exp=
+ort</b><span>Export devices, IR commands, activities and button maps to JSO=
+N while the servers answer.</span></div></li>
+        <li><div><span class=3D"when">Week 2</span><b>Lifeboat restore</b><=
+span>Write the saved file back and confirm the remote still works. This pro=
+ves the write path and gives a safe undo for every later step.</span></div>=
+</li>
+        <li><div><span class=3D"when">Weeks 2=E2=80=936</span><b>Rosetta ro=
+unds</b><span>Collect paired changes and snapshots until the main structure=
+s of the config are mapped.</span></div></li>
+        <li><div><span class=3D"when">Weeks 6+</span><b>Local Studio</b><sp=
+an>Editor, device library and compiler. Ship it when local output matches t=
+he recorded cloud output.</span></div></li>
+      </ol>
+    </section>
+
+    <section id=3D"sources">
+      <h2>Sources</h2>
+      <ul style=3D"margin:0;padding-left:18px;display:grid;gap:4px">
+        <li>MyHarmony Teardown (companion page): templates, device table, p=
+lugin API</li>
+        <li><a href=3D"https://sources.debian.org/src/concordance/1.5-3.1/l=
+ibconcord/remote_mh.cpp">libconcord remote_mh.cpp</a>: MH backend, file pat=
+hs, packet format, checksum</li>
+        <li><a href=3D"https://sources.debian.org/src/concordance/1.5-3.1/l=
+ibconcord/libusbhid.cpp">libconcord libusbhid.cpp</a>: Logitech PID range 0=
+xC110=E2=80=930xC14F, which includes 0xC122</li>
+        <li><a href=3D"https://manpages.ubuntu.com/manpages/focal/man1/conc=
+ordance.1.html">concordance manual</a></li>
+        <li><a href=3D"https://community.openhab.org/t/logitech-killing-har=
+mony-remotes/120609">openHAB forum on the Harmony shutdown</a></li>
+        <li><a href=3D"https://github.com/harmonic-afterglow/afterglow">Aft=
+erglow</a> and its <a href=3D"https://github.com/harmonic-afterglow/aftergl=
+ow/blob/main/docs/harmony_pk/irproto.md">IrProto notes</a></li>
+        <li><a href=3D"https://github.com/turlvo/KuKuHarmony">KuKuHarmony</=
+a></li>
+        <li><a href=3D"https://en.wikipedia.org/wiki/Logitech_Harmony">Logi=
+tech Harmony on Wikipedia</a>: legacy software support ended 28 May 2025</l=
+i>
+        <li><a href=3D"https://github.com/jaymzh/concordance/issues/66">con=
+cordance issue #66</a>: harmonyremote.com server shut down</li>
+      </ul>
+    </section>
+
+    <footer>
+      <span>Ratings and timelines are estimates. Simulator values are illus=
+trative and use the stated assumptions.</span>
+      <span>Prepared with Claude. Nothing was written to the remote.</span>
+    </footer>
+  </main>
+</div>
+
+
+
+<div class=3D"mermaidTooltip" style=3D"opacity: 0;"></div>
+
+
+</body></html>
+------MultipartBoundary--mV2V6unOvInWDWRcs3YaYdYIGu5M1hRFflWI2NLNH3----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap
+
+@charset "utf-8";
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1iIq129k.woff2") format("woff2"); unicode-rang=
+e: U+460-52F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1isq129k.woff2") format("woff2"); unicode-rang=
+e: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1pUL8lJdhg.woff2") format("woff2"); unicode-ra=
+nge: U+2000-2001, U+2004-2008, U+200A, U+23B8-23BD, U+2500-259F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1iAq129k.woff2") format("woff2"); unicode-rang=
+e: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-=
+301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1iEq129k.woff2") format("woff2"); unicode-rang=
+e: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+3=
+29, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4=
+, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2") format("woff2"); unicode-range:=
+ U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+=
+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U=
++FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwl1FgtIU.woff2") format("woff2"); unicode-=
+range: U+460-52F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2=
+F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwlRFgtIU.woff2") format("woff2"); unicode-=
+range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwupkp-8tFQ.woff2") format("woff2"); unicod=
+e-range: U+2000-2001, U+2004-2008, U+200A, U+23B8-23BD, U+2500-259F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwl9FgtIU.woff2") format("woff2"); unicode-=
+range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+=
+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwl5FgtIU.woff2") format("woff2"); unicode-=
+range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308,=
+ U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-=
+20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwlBFgg.woff2") format("woff2"); unicode-ra=
+nge: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308=
+, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEF=
+F, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3vAOwl1FgtIU.woff2") format("woff2"); unicode-=
+range: U+460-52F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2=
+F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlRFgtIU.woff2") format("woff2"); unicode-=
+range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3vAOwupkp-8tFQ.woff2") format("woff2"); unicod=
+e-range: U+2000-2001, U+2004-2008, U+200A, U+23B8-23BD, U+2500-259F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3vAOwl9FgtIU.woff2") format("woff2"); unicode-=
+range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+=
+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3vAOwl5FgtIU.woff2") format("woff2"); unicode-=
+range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308,=
+ U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-=
+20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlBFgg.woff2") format("woff2"); unicode-ra=
+nge: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308=
+, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEF=
+F, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA=
+.woff2") format("woff2"); unicode-range: U+460-52F, U+1C80-1C8A, U+20B4, U+=
+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA=
+.woff2") format("woff2"); unicode-range: U+301, U+400-45F, U+490-491, U+4B0=
+-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA=
+.woff2") format("woff2"); unicode-range: U+370-377, U+37A-37F, U+384-38A, U=
++38C, U+38E-3A1, U+3A3-3FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA=
+.woff2") format("woff2"); unicode-range: U+102-103, U+110-111, U+128-129, U=
++168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+3=
+29, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA=
+.woff2") format("woff2"); unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U=
++2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-=
+1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.wo=
+ff2") format("woff2"); unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, =
+U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+21=
+91, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA=
+.woff2") format("woff2"); unicode-range: U+460-52F, U+1C80-1C8A, U+20B4, U+=
+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA=
+.woff2") format("woff2"); unicode-range: U+301, U+400-45F, U+490-491, U+4B0=
+-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA=
+.woff2") format("woff2"); unicode-range: U+370-377, U+37A-37F, U+384-38A, U=
++38C, U+38E-3A1, U+3A3-3FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA=
+.woff2") format("woff2"); unicode-range: U+102-103, U+110-111, U+128-129, U=
++168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+3=
+29, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA=
+.woff2") format("woff2"); unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U=
++2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-=
+1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.wo=
+ff2") format("woff2"); unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, =
+U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+21=
+91, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA=
+.woff2") format("woff2"); unicode-range: U+460-52F, U+1C80-1C8A, U+20B4, U+=
+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA=
+.woff2") format("woff2"); unicode-range: U+301, U+400-45F, U+490-491, U+4B0=
+-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA=
+.woff2") format("woff2"); unicode-range: U+370-377, U+37A-37F, U+384-38A, U=
++38C, U+38E-3A1, U+3A3-3FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA=
+.woff2") format("woff2"); unicode-range: U+102-103, U+110-111, U+128-129, U=
++168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+3=
+29, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA=
+.woff2") format("woff2"); unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U=
++2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-=
+1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.wo=
+ff2") format("woff2"); unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, =
+U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+21=
+91, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb54C-s0.woff2") format("woff2"); unicode-ran=
+ge: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300=
+-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2") format("woff2"); unicode-ran=
+ge: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+=
+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C=
+4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2") format("woff2"); unicode-range=
+: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U=
++329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, =
+U+FFFD; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb54C-s0.woff2") format("woff2"); unicode-ran=
+ge: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300=
+-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2") format("woff2"); unicode-ran=
+ge: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+=
+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C=
+4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2") format("woff2"); unicode-range=
+: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U=
++329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, =
+U+FFFD; }
+------MultipartBoundary--mV2V6unOvInWDWRcs3YaYdYIGu5M1hRFflWI2NLNH3----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-d424f570-3754-4c4a-b6ff-29d66bbee1f2@mhtml.blink
+
+@charset "utf-8";
+
+:root { color-scheme: light; }
+
+body { margin: 0px; }
+------MultipartBoundary--mV2V6unOvInWDWRcs3YaYdYIGu5M1hRFflWI2NLNH3----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-767f823e-d1e3-40a6-9993-4e004f134c39@mhtml.blink
+
+@charset "utf-8";
+
+:root { --bg: #F3F6F7; --surface: #FFFFFF; --ink: #14232B; --muted: #56676F=
+; --line: #D3DCE0; --accent: #007A80; --accent-soft: #DDF0F0; --ir: #B8324A=
+; --ir-soft: #F7E3E7; --code-bg: #E8EEF0; --console: #10202A; --console-ink=
+: #CFE3E6; --console-dim: #7E979F; --ok: #2F7D4A; --ok-soft: #E1F1E6; --war=
+n: #9A6200; --warn-soft: #F8EDD6; --f-display: "Space Grotesk", "Segoe UI",=
+ system-ui, sans-serif; --f-body: "IBM Plex Sans", "Segoe UI", system-ui, s=
+ans-serif; --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme=3D"light"]) { --bg: #0D1519; --surface: #131F25; --=
+ink: #E2EBEE; --muted: #93A4AC; --line: #26363E; --accent: #3CC6CC; --accen=
+t-soft: #143238; --ir: #F2808F; --ir-soft: #3A1C23; --code-bg: #1A2A31; --c=
+onsole: #081014; --console-ink: #CFE3E6; --console-dim: #6E858D; --ok: #6CC=
+B8B; --ok-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F; color-schem=
+e: dark; }
+}
+
+:root[data-theme=3D"dark"] { --bg: #0D1519; --surface: #131F25; --ink: #E2E=
+BEE; --muted: #93A4AC; --line: #26363E; --accent: #3CC6CC; --accent-soft: #=
+143238; --ir: #F2808F; --ir-soft: #3A1C23; --code-bg: #1A2A31; --console: #=
+081014; --console-ink: #CFE3E6; --console-dim: #6E858D; --ok: #6CCB8B; --ok=
+-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F; color-scheme: dark; =
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-bod=
+y); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right:=
+ max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+
+.wrap { max-width: 1180px; margin: 0px auto; display: grid; grid-template-c=
+olumns: 200px minmax(0px, 1fr); gap: 48px; }
+
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px)=
+; align-self: start; display: grid; gap: 2px; font-size: 13px; }
+
+nav.toc .lbl { font: 600 11px/1 var(--f-body); letter-spacing: 0.08em; text=
+-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+nav.toc a { color: var(--muted); text-decoration: none; padding: 4px 8px; b=
+order-left: 2px solid var(--line); }
+
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent); border-lef=
+t-color: var(--accent); outline: none; }
+
+main { min-width: 0px; display: grid; gap: 56px; }
+
+header.hero { display: grid; gap: 14px; }
+
+.eyebrow { font: 500 12px/1 var(--f-mono); color: var(--accent); letter-spa=
+cing: 0.04em; }
+
+h1 { font: 600 clamp(30px, 4.4vw, 44px)/1.1 var(--f-display); margin: 0px; =
+text-wrap: balance; letter-spacing: -0.01em; }
+
+h2 { font: 600 24px/1.2 var(--f-display); margin: 0px 0px 6px; text-wrap: b=
+alance; }
+
+h3 { font: 600 16px/1.3 var(--f-body); margin: 8px 0px 4px; }
+
+p { margin: 0px 0px 12px; max-width: 68ch; }
+
+.lede { font-size: 17px; color: var(--muted); max-width: 64ch; }
+
+section { display: grid; gap: 14px; scroll-margin-top: 24px; }
+
+section > .sub { color: var(--muted); margin: 0px; }
+
+code { font-family: var(--f-mono); font-size: 0.9em; background: var(--code=
+-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+
+a { color: var(--accent); }
+
+.verdict { background: var(--surface); border: 1px solid var(--line); borde=
+r-radius: 10px; padding: 20px; display: grid; gap: 14px; }
+
+.verdict .big { font: 600 22px/1.3 var(--f-display); text-wrap: balance; ma=
+x-width: 40ch; }
+
+.meter { display: grid; grid-template-columns: repeat(auto-fit, minmax(220p=
+x, 1fr)); gap: 12px; }
+
+.meter div { border-top: 3px solid var(--line); padding-top: 8px; display: =
+grid; gap: 2px; }
+
+.meter div.ok { border-color: var(--ok); }
+
+.meter div.warn { border-color: var(--warn); }
+
+.meter div.risk { border-color: var(--ir); }
+
+.meter b { font: 600 14px/1.3 var(--f-body); }
+
+.meter span { font-size: 13.5px; color: var(--muted); }
+
+.chip { display: inline-block; font: 600 10.5px/1 var(--f-body); letter-spa=
+cing: 0.06em; text-transform: uppercase; padding: 4px 7px; border-radius: 9=
+9px; white-space: nowrap; vertical-align: 2px; }
+
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+
+.chip.risk { background: var(--ir-soft); color: var(--ir); }
+
+.chip.local { background: var(--accent-soft); color: var(--accent); }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px;=
+ background: var(--surface); }
+
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-b=
+ottom: 1px solid var(--line); }
+
+th { font: 600 11px/1.3 var(--f-body); letter-spacing: 0.06em; text-transfo=
+rm: uppercase; color: var(--muted); background: var(--bg); white-space: now=
+rap; }
+
+tr:last-child td { border-bottom: 0px; }
+
+td:first-child { font-weight: 500; min-width: 150px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300p=
+x, 1fr)); gap: 16px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-r=
+adius: 10px; padding: 18px; display: grid; gap: 10px; align-content: start;=
+ min-width: 0px; }
+
+.card.rec { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent=
+) inset; }
+
+.card .tag { font: 600 12px/1 var(--f-mono); color: var(--accent); }
+
+.card h3 { font: 600 19px/1.25 var(--f-display); margin: 0px; }
+
+.card p { margin: 0px; font-size: 14.5px; }
+
+.card ul { margin: 0px; padding-left: 18px; font-size: 14px; display: grid;=
+ gap: 4px; }
+
+.scores { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; fo=
+nt-size: 13px; align-items: center; }
+
+.scores dt { color: var(--muted); }
+
+.scores dd { margin: 0px; display: flex; gap: 3px; align-items: center; }
+
+.pip { width: 18px; height: 6px; border-radius: 3px; background: var(--line=
+); }
+
+.pip.on { background: var(--accent); }
+
+.scores dd.risk .pip.on { background: var(--ir); }
+
+.scores dd small { margin-left: 8px; color: var(--muted); font-size: 12px; =
+}
+
+.diagram { background: var(--surface); border: 1px solid var(--line); borde=
+r-radius: 8px; padding: 16px; overflow-x: auto; }
+
+.diagram pre.mermaid { margin: 0px; background: none; display: flex; justif=
+y-content: center; min-width: 600px; }
+
+.caption { font-size: 13px; color: var(--muted); margin: 0px; }
+
+.sim { background: var(--surface); border: 1px solid var(--line); border-ra=
+dius: 10px; overflow: hidden; display: grid; }
+
+.sim-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: cen=
+ter; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.tabs button, .ctl button { font: 500 13px/1 var(--f-body); border: 1px sol=
+id var(--line); background: var(--bg); color: var(--ink); padding: 8px 12px=
+; border-radius: 6px; cursor: pointer; }
+
+.tabs button[aria-selected=3D"true"] { background: var(--accent); border-co=
+lor: var(--accent); color: var(--surface); }
+
+.ctl { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margi=
+n-left: auto; }
+
+.ctl button.primary { background: var(--accent); color: var(--surface); bor=
+der-color: var(--accent); }
+
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent=
+); outline-offset: 2px; }
+
+.sizer { display: flex; align-items: center; gap: 8px; font-size: 13px; col=
+or: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--line);=
+ flex-wrap: wrap; }
+
+.sizer input { width: 180px; accent-color: var(--accent); }
+
+.sizer output { font: 600 13px/1 var(--f-mono); color: var(--ink); min-widt=
+h: 64px; }
+
+.stats { display: flex; gap: 18px; flex-wrap: wrap; margin-left: auto; font=
+-variant-numeric: tabular-nums; }
+
+.stats span b { font-family: var(--f-mono); color: var(--ink); }
+
+.sim-body { display: grid; grid-template-columns: minmax(0px, 1.25fr) minma=
+x(0px, 1fr); }
+
+.steps { list-style: none; margin: 0px; padding: 8px 0px; display: grid; bo=
+rder-right: 1px solid var(--line); }
+
+.steps li { display: grid; grid-template-columns: 34px 1fr; gap: 0px 10px; =
+padding: 8px 16px; border-left: 3px solid transparent; }
+
+.steps li .dir { font: 600 11px/1.6 var(--f-mono); color: var(--muted); }
+
+.steps li .dir.tx { color: var(--accent); }
+
+.steps li .dir.rx { color: var(--ir); }
+
+.steps li .dir.pc { color: var(--warn); }
+
+.steps li .bytes { font: 500 12.5px/1.5 var(--f-mono); overflow-wrap: anywh=
+ere; }
+
+.steps li .note { grid-column: 2; font-size: 13px; color: var(--muted); }
+
+.steps li.cur { background: var(--accent-soft); border-left-color: var(--ac=
+cent); }
+
+.steps li.done .bytes { color: var(--muted); }
+
+.panel[hidden] { display: none !important; }
+
+.console { background: var(--console); color: var(--console-ink); font: 12.=
+5px/1.6 var(--f-mono); padding: 14px 16px; min-height: 260px; max-height: 4=
+20px; overflow: auto; display: grid; align-content: start; gap: 2px; }
+
+.console .dim { color: var(--console-dim); }
+
+.progress { height: 4px; background: var(--line); }
+
+.progress i { display: block; height: 100%; width: 0px; background: var(--a=
+ccent); transition: width 0.2s; }
+
+.assume { font-size: 12.5px; color: var(--muted); padding: 10px 16px; borde=
+r-top: 1px solid var(--line); }
+
+ol.road { list-style: none; margin: 0px; padding: 0px; display: grid; gap: =
+0px; counter-reset: r 0; }
+
+ol.road li { counter-increment: r 1; display: grid; grid-template-columns: =
+40px 1fr; gap: 14px; padding-bottom: 18px; position: relative; }
+
+ol.road li::before { content: counter(r); width: 32px; height: 32px; border=
+-radius: 50%; background: var(--accent); color: var(--surface); font: 600 1=
+4px/32px var(--f-mono); text-align: center; z-index: 1; }
+
+ol.road li::after { content: ""; position: absolute; left: 15px; top: 32px;=
+ bottom: 0px; width: 2px; background: var(--line); }
+
+ol.road li:last-child::after { display: none; }
+
+ol.road b { display: block; }
+
+ol.road span { color: var(--muted); font-size: 14px; display: block; max-wi=
+dth: 68ch; }
+
+ol.road .when { font: 500 12px/1.6 var(--f-mono); color: var(--accent); }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--=
+line); padding-top: 16px; display: grid; gap: 6px; }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0px, 1fr); gap: 24px; }
+  nav.toc { position: static; display: flex; flex-wrap: wrap; gap: 6px; }
+  nav.toc .lbl { width: 100%; margin: 0px; }
+  nav.toc a { border: 1px solid var(--line); border-radius: 99px; padding: =
+4px 10px; }
+  .sim-body { grid-template-columns: minmax(0px, 1fr); }
+  .steps { border-right: 0px; border-bottom: 1px solid var(--line); }
+  .ctl { margin-left: 0px; }
+}
+------MultipartBoundary--mV2V6unOvInWDWRcs3YaYdYIGu5M1hRFflWI2NLNH3------

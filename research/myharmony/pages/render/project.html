@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Harmony 600 Project Log</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: third page of the same field notebook (Teardown, Offline Plan). Contents rail, one reading column; a status strip up top, then the work in the order it happened. Teal = done and local, amber = waiting on a decision, red = risk. */
+:root {
+  --bg: #F3F6F7; --surface: #FFFFFF; --ink: #14232B; --muted: #56676F; --line: #D3DCE0;
+  --accent: #007A80; --accent-soft: #DDF0F0; --ir: #B8324A; --ir-soft: #F7E3E7;
+  --code-bg: #E8EEF0; --ok: #2F7D4A; --ok-soft: #E1F1E6; --warn: #9A6200; --warn-soft: #F8EDD6;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1519; --surface: #131F25; --ink: #E2EBEE; --muted: #93A4AC; --line: #26363E;
+    --accent: #3CC6CC; --accent-soft: #143238; --ir: #F2808F; --ir-soft: #3A1C23;
+    --code-bg: #1A2A31; --ok: #6CCB8B; --ok-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1519; --surface: #131F25; --ink: #E2EBEE; --muted: #93A4AC; --line: #26363E;
+  --accent: #3CC6CC; --accent-soft: #143238; --ir: #F2808F; --ir-soft: #3A1C23;
+  --code-bg: #1A2A31; --ok: #6CCB8B; --ok-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 48px; }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; display: grid; gap: 2px; font-size: 13px; }
+nav.toc .lbl { font: 600 11px/1 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+nav.toc a { color: var(--muted); text-decoration: none; padding: 4px 8px; border-left: 2px solid var(--line); }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent); border-left-color: var(--accent); outline: none; }
+main { min-width: 0; display: grid; gap: 52px; }
+header.hero { display: grid; gap: 14px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); color: var(--accent); letter-spacing: .04em; }
+h1 { font: 600 clamp(30px, 4.4vw, 44px)/1.1 var(--f-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font: 600 24px/1.2 var(--f-display); margin: 0 0 6px; text-wrap: balance; }
+h3 { font: 600 16px/1.3 var(--f-body); margin: 8px 0 4px; }
+p { margin: 0 0 12px; max-width: 68ch; }
+.lede { font-size: 17px; color: var(--muted); max-width: 64ch; }
+section { display: grid; gap: 14px; scroll-margin-top: 24px; }
+section > .sub { color: var(--muted); margin: 0; }
+code { font-family: var(--f-mono); font-size: .9em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+
+.status { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.status div { background: var(--surface); padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+.status b { font: 600 15px/1.3 var(--f-body); }
+.status span { font-size: 13.5px; color: var(--muted); }
+
+.chip { display: inline-block; font: 600 10.5px/1 var(--f-body); letter-spacing: .06em; text-transform: uppercase; padding: 4px 7px; border-radius: 99px; white-space: nowrap; vertical-align: 2px; width: fit-content; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.risk { background: var(--ir-soft); color: var(--ir); }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 11px/1.3 var(--f-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.num, .num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); }
+td .names { font: 12.5px/1.5 var(--f-mono); color: var(--muted); }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; display: flex; justify-content: center; min-width: 640px; }
+.caption { font-size: 13px; color: var(--muted); margin: 0; }
+
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; counter-reset: s; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 14px; padding-bottom: 16px; position: relative; }
+ol.steps li::before { content: counter(s); width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--surface); font: 600 13px/30px var(--f-mono); text-align: center; z-index: 1; }
+ol.steps li::after { content: ""; position: absolute; left: 14px; top: 30px; bottom: 0; width: 2px; background: var(--line); }
+ol.steps li:last-child::after { display: none; }
+ol.steps b { display: block; }
+ol.steps span { color: var(--muted); font-size: 14px; display: block; max-width: 70ch; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.card.ask { border-color: var(--warn); }
+.card h3 { margin: 0; font: 600 17px/1.3 var(--f-display); }
+.card p { margin: 0; font-size: 14.5px; }
+pre.cmd { margin: 0; background: var(--code-bg); border-radius: 6px; padding: 10px 12px; font: 12.5px/1.5 var(--f-mono); overflow-x: auto; white-space: pre; }
+ul.clean { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14.5px; }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 6px; }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  nav.toc { position: static; display: flex; flex-wrap: wrap; gap: 6px; }
+  nav.toc .lbl { width: 100%; margin: 0; }
+  nav.toc a { border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; }
+}
+</style>
+<style>:root{color-scheme:light}body{margin:0}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <div class="lbl">Contents</div>
+    <a href="#status">Status</a>
+    <a href="#route">How it was done</a>
+    <a href="#remote">What is on the remote</a>
+    <a href="#pipeline">Read pipeline</a>
+    <a href="#format">The 600 format</a>
+    <a href="#builder">Building configs</a>
+    <a href="#saved">What is saved</a>
+    <a href="#next">Your decisions</a>
+    <a href="#pages">Related pages</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">Harmony-remote-assistant · project log · 12 Nov 2026</div>
+      <h1>The Harmony 600, readable without Logitech</h1>
+      <p class="lede">The remote's configuration is backed up over USB and read back locally into its devices, IR codes, button names and activities, with no Logitech software or server involved. Nothing has been written to the remote. This page records how, what came out, and what comes next.</p>
+    </header>
+
+    <section id="status">
+      <h2>Status</h2>
+      <div class="status">
+        <div><span class="chip ok">Done</span><b>Backup</b><span>666,177 bytes read off the remote through libconcord, with its checksums.</span></div>
+        <div><span class="chip ok">Done</span><b>Local reader</b><span>Afterglow imports the backup: 3 devices, all 175 IR codes, 2 activities.</span></div>
+        <div><span class="chip ok">Done</span><b>Verified</b><span>35 of 36 named TV keys send Samsung's own code for that name.</span></div>
+        <div><span class="chip warn">Waiting</span><b>Building new configs</b><span>harmony-explorations can do it; running it needs your permission and your device models.</span></div>
+        <div><span class="chip risk">Risk</span><b>Logitech's service</b><span>MyHarmony still answers today. The older service closed on 28 May 2025.</span></div>
+      </div>
+    </section>
+
+    <section id="route">
+      <h2>How it was done</h2>
+      <p class="sub">In order. Every USB step only read.</p>
+      <ol class="steps">
+        <li><div><b>Took MyHarmony apart</b><span>A 2013 browser shell running a Silverlight app from Logitech's servers, which drives the remote through a USB plugin and about 230 protocol templates.</span></div></li>
+        <li><div><b>Assessed going offline</b><span>Four proposals; the blocker was the server that compiles devices and activities into the remote's configuration file.</span></div></li>
+        <li><div><b>Backed up with Afterglow</b><span>Its libconcord, taken from the checksum-verified Windows release, identified the remote and read <code>/cfg/usercfg</code>. No driver was changed.</span></div></li>
+        <li><div><b>Found the format</b><span>The file is the Harmony One's <code>GSPM</code> image with a different base, index and constant; the One's checksum matches exactly.</span></div></li>
+        <li><div><b>Taught Afterglow the 600</b><span>A read-only profile and backend: section mapping, command objects, the 54-key table, the LCD font, page labels and activity names.</span></div></li>
+        <li><div><b>Evaluated a builder</b><span>harmony-explorations builds 600 configurations from a recipe and has run one on a real 600.</span></div></li>
+        <li><div><b>Saved and documented</b><span>Everything is in local git repositories, with a process document and a format document.</span></div></li>
+      </ol>
+    </section>
+
+    <section id="remote">
+      <h2>What is on the remote</h2>
+      <p class="sub">Harmony 600, skin 71, architecture 14, firmware 0.3, board 1.1.0.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Device</th><th>Commands</th><th>Named</th><th>Examples of names read</th></tr></thead>
+        <tbody>
+          <tr><td>TV <span class="caption">(Samsung)</span></td><td class="num">71</td><td class="num">55</td><td><span class="names">VolumeUp, Number0–9, Red…Blue, Menu, Guide, SRC, 3D, HDMI1- CCTV, HDMI2- AVR, HDMI- ARC, HDMI3, Subtitles</span></td></tr>
+          <tr><td>AVR</td><td class="num">54</td><td class="num">52</td><td><span class="names">Bluetooth, Radio, Internet Radio, Online Music, Media Player, TV Audio, CD, CBL/SAT, Bluray/DVD, Game, Aux, USB</span></td></tr>
+          <tr><td>HiFi <span class="caption">(Panasonic-type IR)</span></td><td class="num">50</td><td class="num">20</td><td><span class="names">Power Toggle, Input Radio, Input Cd/Usb/Aux, D.Bass, Sound Mode, Preset Next, Timer, Sleep, Setup</span></td></tr>
+        </tbody>
+      </table></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Activity</th><th>Starts</th><th>Keys go to</th></tr></thead>
+        <tbody>
+          <tr><td>Muzica</td><td>AVR on, HiFi off</td><td>AVR</td></tr>
+          <tr><td>Tivù</td><td>TV on</td><td>TV</td></tr>
+        </tbody>
+      </table></div>
+      <p class="caption">Commands still numbered (16 TV, 2 AVR, 30 HiFi) are used by no key and no page, so the file gives them no name.</p>
+    </section>
+
+    <section id="pipeline">
+      <h2>Read pipeline</h2>
+      <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  R[("Harmony 600<br/>USB 046d:c122")] -- "HID, read only" --> L["libconcord<br/>(Afterglow's build)"]
+  L --> B["lifeboat_read.py<br/>backup + identity"]
+  B --> E[("config.ezhex<br/>usercfg.bin")]
+  E --> A["Afterglow importer<br/>harmony-600 profile"]
+  A --> O["Harmony One reader<br/>under the 600 layout"]
+  O --> P[("project.json<br/>devices, codes, activities")]
+  K["600 key table<br/>harmony-explorations"] --> O
+  G["LCD glyph shapes"] --> O
+</pre>
+      </div>
+      <p class="caption"><code>python tools/lifeboat_read.py --dlls vendor/afterglow-dlls</code>, then <code>python tools/read_600_config.py backups/&lt;folder&gt;/config.ezhex</code>. MyHarmony must be closed first.</p>
+    </section>
+
+    <section id="format">
+      <h2>The 600 format</h2>
+      <p class="sub">Measured on this remote's backup. Full detail is in <code>afterglow/docs/harmony_600/README.md</code>.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Field</th><th>Harmony One</th><th>Harmony 600</th></tr></thead>
+        <tbody>
+          <tr><td>Magic, end marker, checksum</td><td><code>GSPM</code>, <code>PTYY</code>, XOR lanes <code>0x21</code>/<code>0x43</code></td><td>the same</td></tr>
+          <tr><td>Pointer base</td><td class="num">0x040000</td><td class="num">0x030000</td></tr>
+          <tr><td>Header constant</td><td class="num">0x1600</td><td class="num">0x1400</td></tr>
+          <tr><td>Section index</td><td>20 slots, slot 8 absent</td><td>18 slots; One 9–18 are 600 8–17, no touch section</td></tr>
+          <tr><td>Command object</td><td><code>7D 7C</code></td><td><code>7F 7D 7C</code></td></tr>
+          <tr><td>Screen slot</td><td>template, key register, program</td><td>key register, program</td></tr>
+          <tr><td>Keys</td><td>40, scan 1–40</td><td>54, scan 1–54, own numbering</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="builder">
+      <h2>Building configs</h2>
+      <p>harmony-explorations (MIT) builds a whole 600 configuration from a recipe of devices and activities, without any Logitech file, and has written one to a real 600 that ran it. 16 of its 68 requirements for the 600 are proven by tests, among them build, verified write, and backup and restore. Still open: turning an existing configuration into an editable recipe, catalogue search, and a written procedure for writing to a new owner's remote.</p>
+      <p>To rebuild this remote's setup it needs a catalogue entry per device. The configuration stores no make or model, so those have to come from MyHarmony or from matching the recovered IR codes against the IR archive (276,000 devices, CC0, already downloaded).</p>
+    </section>
+
+    <section id="saved">
+      <h2>What is saved</h2>
+      <p class="sub">All local; nothing is pushed anywhere.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Where</th><th>Branch</th><th>What</th></tr></thead>
+        <tbody>
+          <tr><td><code>Harmony-remote-assistant</code></td><td><code>work/harmony-600</code></td><td>backup, tools, docs, MyHarmony research text, the saved pages</td></tr>
+          <tr><td><code>afterglow/</code></td><td><code>harmony-600-readonly</code></td><td>the 600 profile, backend, glyph table and format document</td></tr>
+          <tr><td><code>vendor/afterglow-dlls/</code></td><td>on disk</td><td>libconcord for Windows, with <code>SOURCE.txt</code></td></tr>
+          <tr><td><code>research/myharmony/</code></td><td>text in git, binaries on disk</td><td>MyHarmony packages, assemblies, templates, scripts</td></tr>
+        </tbody>
+      </table></div>
+      <ul class="clean">
+        <li><code>docs/afterglow-harmony-600.md</code>: the whole process, step by step and reproducible</li>
+        <li><code>docs/harmony-explorations-evaluation.md</code>: the builder evaluation</li>
+        <li><code>afterglow/docs/harmony_600/README.md</code>: the format, as Afterglow documentation</li>
+      </ul>
+      <p class="caption"><span class="chip risk">Keep a copy</span> Copy <code>backups/</code> off this computer. It lists what is set up in a home, so keep it private.</p>
+    </section>
+
+    <section id="next">
+      <h2>Your decisions</h2>
+      <div class="cards">
+        <article class="card ask">
+          <span class="chip warn">Needs approval</span>
+          <h3>Run the builder</h3>
+          <p>Installing harmony-explorations' dependencies runs third-party code, so it needs your permission.</p>
+          <pre class="cmd">cd harmony-explorations
+npx pnpm@11.20.0 install --frozen-lockfile</pre>
+        </article>
+        <article class="card ask">
+          <span class="chip warn">Needs input</span>
+          <h3>Device models</h3>
+          <p>The make and model of the TV, the AVR and the HiFi, as MyHarmony lists them. Or ask for a search of the IR archive by the recovered codes.</p>
+        </article>
+        <article class="card">
+          <span class="chip ok">Optional</span>
+          <h3>Contribute to Afterglow</h3>
+          <p>The 600 backend reuses the One's reader, which Afterglow's removability rule forbids. A copy or a shared module would fix it; that choice is the maintainers'.</p>
+        </article>
+      </div>
+      <p class="caption">Nothing will be written to the remote without your explicit approval, and only after a fresh backup.</p>
+    </section>
+
+    <section id="pages">
+      <h2>Related pages</h2>
+      <ul class="clean">
+        <li><a href="https://claude.ai/artifact/19NR3pGqSGTQSFSHYc7ibq">MyHarmony Teardown</a>: how the MyHarmony software works</li>
+        <li><a href="https://claude.ai/artifact/5DPQUGMHRKbXDuN4x95nBg">Harmony Offline Plan</a>: the four offline proposals, the USB simulator and the related projects</li>
+        <li><a href="https://github.com/harmonic-afterglow/afterglow">Afterglow</a> · <a href="https://github.com/dannybloe/harmony-explorations">harmony-explorations</a> · <a href="https://github.com/pickysysadmin/logitech-harmony-ir-archive">IR archive</a> · <a href="https://github.com/jaymzh/concordance">Concordance</a></li>
+      </ul>
+    </section>
+
+    <footer>
+      <span>Every figure on this page was measured on this remote's backup on 11–12 November 2026.</span>
+      <span>Prepared with Claude. Nothing was written to the remote.</span>
+    </footer>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"neutral",securityLevel:"loose"});mermaid.run({querySelector:"pre.mermaid"}).then(function(){document.documentElement.dataset.rendered="1"});</script>
+</body>
+</html>

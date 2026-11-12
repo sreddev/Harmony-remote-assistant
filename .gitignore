@@ -1,0 +1,11 @@
+# never publish a remote's configuration
+/backups/
+*.ezhex
+usercfg.bin
+project.json
+# clones that live beside this project
+/afterglow/
+/harmony-explorations/
+/logitech-harmony-ir-archive/
+/.venv/
+__pycache__/

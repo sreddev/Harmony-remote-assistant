@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MyHarmony Teardown</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: technical field notebook. Sticky contents rail on wide screens, single reading column, wide tables and diagrams scroll inside their own boxes. Teal comes from MyHarmony's own CSS (#00BEBE); red stands for the IR / hardware side. */
+:root {
+  --bg: #F3F6F7;
+  --surface: #FFFFFF;
+  --ink: #14232B;
+  --muted: #56676F;
+  --line: #D3DCE0;
+  --accent: #007A80;
+  --accent-soft: #DDF0F0;
+  --ir: #B8324A;
+  --ir-soft: #F7E3E7;
+  --code-bg: #E8EEF0;
+  --ok: #2F7D4A;
+  --ok-soft: #E1F1E6;
+  --warn: #9A6200;
+  --warn-soft: #F8EDD6;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1519; --surface: #131F25; --ink: #E2EBEE; --muted: #93A4AC; --line: #26363E;
+    --accent: #3CC6CC; --accent-soft: #143238; --ir: #F2808F; --ir-soft: #3A1C23;
+    --code-bg: #1A2A31; --ok: #6CCB8B; --ok-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1519; --surface: #131F25; --ink: #E2EBEE; --muted: #93A4AC; --line: #26363E;
+  --accent: #3CC6CC; --accent-soft: #143238; --ir: #F2808F; --ir-soft: #3A1C23;
+  --code-bg: #1A2A31; --ok: #6CCB8B; --ok-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 15px/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 48px; }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; display: grid; gap: 2px; font-size: 13px; }
+nav.toc .lbl { font: 600 11px/1 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+nav.toc a { color: var(--muted); text-decoration: none; padding: 4px 8px; border-left: 2px solid var(--line); }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent); border-left-color: var(--accent); outline: none; }
+main { min-width: 0; display: grid; gap: 56px; }
+header.hero { display: grid; gap: 14px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); color: var(--accent); letter-spacing: .04em; }
+h1 { font: 600 clamp(30px, 4.4vw, 44px)/1.1 var(--f-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font: 600 24px/1.2 var(--f-display); margin: 0 0 6px; text-wrap: balance; }
+h3 { font: 600 16px/1.3 var(--f-body); margin: 20px 0 8px; }
+p { margin: 0 0 12px; max-width: 68ch; }
+.lede { font-size: 17px; color: var(--muted); max-width: 64ch; }
+section { display: grid; gap: 14px; scroll-margin-top: 24px; }
+section > .sub { color: var(--muted); margin: 0; }
+code, .mono { font-family: var(--f-mono); font-size: .9em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.fact { background: var(--surface); padding: 14px 16px; display: grid; gap: 4px; align-content: start; }
+.fact .k { font: 600 11px/1.2 var(--f-body); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.fact .v { font: 500 15px/1.35 var(--f-mono); overflow-wrap: anywhere; }
+.fact .v.ir { color: var(--ir); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); align-items: center; }
+.chip { display: inline-block; font: 600 10.5px/1 var(--f-body); letter-spacing: .06em; text-transform: uppercase; padding: 4px 7px; border-radius: 99px; white-space: nowrap; vertical-align: 2px; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.inf { background: var(--warn-soft); color: var(--warn); }
+.chip.risk { background: var(--ir-soft); color: var(--ir); }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 11px/1.3 var(--f-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td.mono, td code { white-space: nowrap; }
+td.ops { font: 13px/1.5 var(--f-mono); color: var(--muted); min-width: 280px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: none; display: flex; justify-content: center; min-width: 560px; }
+.caption { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Packet byte map */
+.packet { display: grid; gap: 10px; }
+.bytes { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; }
+.byte { flex: 0 0 auto; min-width: 92px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); padding: 8px 10px; display: grid; gap: 2px; }
+.byte .off { font: 11px/1 var(--f-mono); color: var(--muted); }
+.byte .val { font: 600 16px/1.2 var(--f-mono); }
+.byte .nm { font-size: 12px; color: var(--muted); }
+.byte.hdr { border-color: var(--accent); }
+.byte.hdr .val { color: var(--accent); }
+.byte.prm { border-style: dashed; min-width: 180px; }
+.byte.prm .val { color: var(--ir); }
+
+.callout { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; }
+.callout.risk { border-color: color-mix(in srgb, var(--ir) 45%, var(--line)); }
+.callout p { margin: 0; }
+ul.clean { margin: 0; padding-left: 18px; display: grid; gap: 6px; max-width: 72ch; }
+ol.threads { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; counter-reset: t; }
+ol.threads li { counter-increment: t; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px 12px 52px; position: relative; }
+ol.threads li::before { content: counter(t); position: absolute; left: 16px; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font: 600 12px/24px var(--f-mono); text-align: center; }
+ol.threads b { display: block; margin-bottom: 2px; }
+ol.threads span { color: var(--muted); font-size: 14px; }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  nav.toc { position: static; display: flex; flex-wrap: wrap; gap: 6px; }
+  nav.toc .lbl { width: 100%; margin: 0; }
+  nav.toc a { border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+<style>:root{color-scheme:light}body{margin:0}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <div class="lbl">Contents</div>
+    <a href="#glance">At a glance</a>
+    <a href="#stack">Layer stack</a>
+    <a href="#processes">Processes</a>
+    <a href="#app">Silverlight app</a>
+    <a href="#cloud">Cloud services</a>
+    <a href="#driver">USB driver</a>
+    <a href="#molson">Molson protocol</a>
+    <a href="#sync">Sync flow</a>
+    <a href="#risks">Risks</a>
+    <a href="#evidence">Evidence</a>
+    <a href="#next">Open threads</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">Harmony-remote-assistant · field notes · 11 Nov 2026</div>
+      <h1>How MyHarmony drives a Harmony 600</h1>
+      <p class="lede">A teardown of the running Logitech MyHarmony 1.0.1.308 desktop app: what each layer does, which cloud services it calls, and the USB protocol it uses to read and write the remote.</p>
+      <div class="legend">
+        <span><span class="chip ok">Verified</span> seen in binaries, files or the live system</span>
+        <span><span class="chip inf">Inferred</span> deduced from names and structure, not yet confirmed</span>
+      </div>
+    </header>
+
+    <section id="glance">
+      <h2>At a glance</h2>
+      <div class="facts">
+        <div class="fact"><span class="k">Remote on USB</span><span class="v ir">046D:C122</span></div>
+        <div class="fact"><span class="k">Remote family</span><span class="v">"Molson" (arch 14/16)</span></div>
+        <div class="fact"><span class="k">App version</span><span class="v">1.0.1.308</span></div>
+        <div class="fact"><span class="k">Browser engine</span><span class="v">CEF 3.1547 / Chrome 29</span></div>
+        <div class="fact"><span class="k">App runtime</span><span class="v">Silverlight 5.1.20913</span></div>
+        <div class="fact"><span class="k">Logic lives</span><span class="v">setup.myharmony.com</span></div>
+      </div>
+      <p>The installed program is a browser shell plus a USB driver. Almost all logic, including the UI, the sync engine and the protocol scripts, is downloaded from Logitech at runtime as Silverlight packages. Without Logitech's servers the app cannot do anything.</p>
+    </section>
+
+    <section id="stack">
+      <h2>Layer stack</h2>
+      <p class="sub">From the launcher you double-click down to the HID reports on the wire.</p>
+      <div class="diagram">
+<pre class="mermaid">
+flowchart TB
+  L["MyHarmonyLauncher.exe (.NET)<br/>update check, unzip AppFiles"] --> S["MyHarmony.exe<br/>CEF 3.1547 browser shell"]
+  S --> PG["Renderer: harmonyconfig page<br/>JSHarmonyUtil.js, HarmonyConfig.js"]
+  S -. "window.jsHandler<br/>(app helpers only)" .-> PG
+  PG --> SL["Silverlight 5 plugin process<br/>MartiniWeb app (XAP packages)"]
+  SL -- "HtmlPage invoke<br/>remoteEngine.performOperation" --> NP["NprtHarmonyPlugin.dll<br/>NPAPI, application/x-harmonyplugin"]
+  NP --> SDE["SDE.dll<br/>remote manager, HID channel"]
+  SDE --> USB["UsbDevice.dll<br/>Windows HID.DLL + DeviceIoControl"]
+  USB --> R[("Harmony 600<br/>046D:C122")]
+  SL -- "SOAP over HTTPS" --> C[("Logitech cloud<br/>setup.myharmony.com")]
+  L -. "updates" .-> U[("app.myharmony.com")]
+  L -. "error logs" .-> G[("Loggly")]
+</pre>
+      </div>
+      <p class="caption">Solid arrows carry the main work. Dotted arrows are support paths. <span class="chip ok">Verified</span></p>
+    </section>
+
+    <section id="processes">
+      <h2>Processes</h2>
+      <p class="sub">The process tree observed while the app was open.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>PID</th><th>Process</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td class="mono num">47788</td><td><code>MyHarmonyLauncher.exe</code></td><td>Checks for updates, extracts <code>AppFiles.zip</code>, starts the shell with <code>version;configUrl;logUrl;recoveryToolUrl;lang</code>, then exits.</td></tr>
+          <tr><td class="mono num">48520</td><td><code>MyHarmony.exe</code></td><td>Main browser process. Opens <code>/MartiniWeb/Account/harmonyconfig</code>. Listens on <code>127.0.0.1:8088</code> (DevTools).</td></tr>
+          <tr><td class="mono num">43964</td><td><code>--type=renderer --no-sandbox</code></td><td>Renders the web page and runs its JavaScript.</td></tr>
+          <tr><td class="mono num">36356</td><td><code>--type=plugin NprtHarmonyPlugin.dll</code></td><td>Logitech's USB plugin. Talks to the remote.</td></tr>
+          <tr><td class="mono num">50592</td><td><code>--type=plugin npctrl.dll</code></td><td>Bundled Microsoft Silverlight 5. Runs the MartiniWeb app.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="caption">The Logitech Options+ processes on the machine are unrelated. <span class="chip ok">Verified</span></p>
+    </section>
+
+    <section id="app">
+      <h2>Silverlight app ("MartiniWeb")</h2>
+      <p class="sub">The app is split into packages that load on demand. These were in the local cache.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Package</th><th>What it does</th><th>Notable assemblies</th></tr></thead>
+        <tbody>
+          <tr><td><code>BootStrapper</code></td><td>First package loaded. Downloads the rest.</td><td class="ops">Web.MartiniWeb.Downloader</td></tr>
+          <tr><td><code>Core</code></td><td>Shell, dependency injection, data access, protocol driver.</td><td class="ops">Web.Driver, Engine.RemoteCommunicator, Data.HarmonyPlatform, Data.DesktopServices, Data.RestPlatform, Prism, Ninject</td></tr>
+          <tr><td><code>Account.Login</code></td><td>Sign in, create account.</td><td class="ops">Data.HarmonyPlatform</td></tr>
+          <tr><td><code>Account.Management</code></td><td>Account settings.</td><td class="ops">—</td></tr>
+          <tr><td><code>Dashboard.Main</code></td><td>Home screen: devices, activities, remote.</td><td class="ops">ButtonMapping, ButtonMappingUtils</td></tr>
+          <tr><td><code>Device.AddDevice</code></td><td>Search and add a TV, AV receiver and so on.</td><td class="ops">Driver, RemoteCommunicator, Activity.Setup</td></tr>
+          <tr><td><code>Activity.Setup</code></td><td>Build activities like "Watch TV".</td><td class="ops">RemoteSync, ButtonMapping</td></tr>
+          <tr><td><code>ActivityRemote.ButtonMapping</code></td><td>Customize buttons per activity or device.</td><td class="ops">ButtonMappingUtils</td></tr>
+          <tr><td><code>Remote.RemoteSync</code></td><td>The sync screen and progress.</td><td class="ops">—</td></tr>
+        </tbody>
+      </table></div>
+      <h3>JavaScript bridge</h3>
+      <p>The page creates the USB plugin as <code>&lt;object id="HarmonyPlugin" type="application/x-harmonyplugin"&gt;</code> and stores it in the global <code>remoteEngine</code>. The Silverlight driver calls it through the browser bridge. It first checks for <code>window.jsHandler</code>. In this shell, <code>jsHandler</code> only offers <code>clearCache</code>, <code>getAppVersion</code>, <code>getKeyBoardLocale</code>, <code>getKeyboardLayout</code> and <code>silverlightLoaded</code>, so all device I/O goes to the plugin. <span class="chip ok">Verified</span></p>
+      <p><code>HarmonyConfig.js</code> also contains a WebSocket client that sends <code>hbus</code> commands to a Harmony Hub through the cloud. It is not used with a 600.</p>
+    </section>
+
+    <section id="cloud">
+      <h2>Cloud services</h2>
+      <p class="sub">WCF SOAP contracts found in the app's assemblies. Your account, devices, activities and button maps all live here.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Contract</th><th>Purpose</th><th>Key operations</th></tr></thead>
+        <tbody>
+          <tr><td><code>ISecurity</code><br><code>ILinkSecurity</code></td><td>Sign-in and tokens</td><td class="ops">LoginUser, SignIn, SignUp, GetUserAuthToken, ResetPassword, IsLoggedIn, LogoutUser</td></tr>
+          <tr><td><code>IAccountManager</code></td><td>Account and household</td><td class="ops">GetMyAccount, GetMyHousehold, UpdateMyAccountProperties, SaveEmailPreferences, StartSetupSession</td></tr>
+          <tr><td><code>IDeviceManager</code><br><code>IGlobalDeviceManager</code></td><td>Logitech's device database</td><td class="ops">SearchGlobalDevices, SearchManufacturers, GetCommands, GetCommandsToLearnForConnectedRemote, GetMyDevices, UpdateMyData, GetInputInfo</td></tr>
+          <tr><td><code>IActivityManager</code></td><td>Activities</td><td class="ops">GetActivities, SaveActivities, GetRecommendedActivities, ResolvePrimaryDeviceForActivity, ResetActivitiesToDefault</td></tr>
+          <tr><td><code>IUserButtonMappingManager</code></td><td>Button layout</td><td class="ops">GetButtonMaps, SaveButtonMaps, SaveSequence, GetRemoteCanvas, RestoreToDefaultButtonMaps</td></tr>
+          <tr><td><code>IUserFeatureManager</code></td><td>Device features</td><td class="ops">GetUserFeatures, SaveUserFeatures, CopyFeaturesFromGlobalDevice</td></tr>
+          <tr><td><code>IRemoteManager</code></td><td>The remote's record</td><td class="ops">GetRemote, GetRemoteSettings, SaveRemoteSettings, GetSyncStatus, RegisterSuccessfulSync, AcceptLicenseAgreement</td></tr>
+          <tr><td><code>ICompileManager</code></td><td>Builds the remote's config</td><td class="ops">StartCompile, StartCompileWithLocale, IsRemoteSyncRequired, IsUserConfigChanged</td></tr>
+          <tr><td><code>IRomDataLibrary</code></td><td>Protocol scripts and payloads</td><td class="ops">RequestRomData, RequestOperationData (RomDataService.svc)</td></tr>
+          <tr><td><code>IInfraredAnalysisManager</code></td><td>Decodes learned IR</td><td class="ops">AnalyzeInfrared</td></tr>
+          <tr><td><code>IUserAccountDirector</code></td><td>Facade over most of the above</td><td class="ops">GetDeviceList, GetActivities, GetButtonMaps, PutSettings, UpgradeConfig, SubmitUserDataLogs, …</td></tr>
+          <tr><td><code>IProductManager</code>, <code>IDiscovery</code>, <code>IPlatformService</code></td><td>Products, service discovery, health</td><td class="ops">GetHarmonyProducts, GetAllServices, Ping, BuildInfo</td></tr>
+        </tbody>
+      </table></div>
+      <p class="caption">Contract and operation names: <span class="chip ok">Verified</span>. Purposes are read from the names: <span class="chip inf">Inferred</span></p>
+    </section>
+
+    <section id="driver">
+      <h2>USB driver</h2>
+      <p class="sub">Three native 32-bit DLLs in <code>AppFiles\PlugIns\HarmonyRemoteDriver_32</code>. They use the standard Windows HID driver, with no custom kernel driver.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Plugin call</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>getDevices()</code></td><td>Lists connected remotes with token, VID, PID, skin and report lengths.</td></tr>
+          <tr><td><code>addUsbDevice(vid, pid)</code></td><td>Registers a VID/PID pair to watch for.</td></tr>
+          <tr><td><code>getAttributeByKey(key)</code></td><td>Reads a plugin attribute, e.g. <code>plugin_version</code>.</td></tr>
+          <tr><td><code>performOperation(deviceId, packets, numberOfResponses)</code></td><td>Sends HID packets and returns the responses. Every protocol step uses this.</td></tr>
+          <tr><td><code>cancelCommand(deviceId)</code></td><td>Aborts the running command.</td></tr>
+          <tr><td><code>cleanupRemote()</code>, <code>cleanupAll()</code></td><td>Releases handles.</td></tr>
+        </tbody>
+      </table></div>
+      <p><code>SDE.dll</code> holds the remote manager and HID channel classes. <code>UsbDevice.dll</code> exports <code>OpenChannel</code>, <code>Read</code>, <code>Write</code>, <code>GetVendorId</code>, <code>GetProductId</code> and the input/output packet sizes, and calls <code>HidD_*</code> plus <code>DeviceIoControl</code>. <span class="chip ok">Verified</span></p>
+    </section>
+
+    <section id="molson">
+      <h2>Molson protocol</h2>
+      <p class="sub">The protocol family the driver's device table assigns to <code>046D:C122</code>. It works like a tiny file system over HID.</p>
+      <p>The driver's config lists two Molson entries for this PID: model 96 (skins 91–96, "Martini") and model 66 (skins 66–75, "Member Web"). Both support five operations: <code>identifyremote</code>, <code>connectivity</code>, <code>userconfiguration</code>, <code>learnir</code> and <code>firmwareupgrade</code>. Which model your 600 reports is still to be confirmed.</p>
+
+      <div class="packet">
+        <h3>Request packet</h3>
+        <div class="bytes" role="img" aria-label="Packet layout: service ID, command ID, sequence number, parameter count, then parameters">
+          <div class="byte hdr"><span class="off">byte 0</span><span class="val">0xFF</span><span class="nm">service ID</span></div>
+          <div class="byte hdr"><span class="off">byte 1</span><span class="val">cmd</span><span class="nm">command ID</span></div>
+          <div class="byte hdr"><span class="off">byte 2</span><span class="val">seq</span><span class="nm">sequence no.</span></div>
+          <div class="byte hdr"><span class="off">byte 3</span><span class="val">n</span><span class="nm">param count</span></div>
+          <div class="byte prm"><span class="off">byte 4…</span><span class="val">params</span><span class="nm">byte, word, dword or string</span></div>
+        </div>
+        <p class="caption">Example: open the system info file is <code>FF 01 00 02 "/sys/sysinfo" "R"</code>. The response echoes <code>FF 01</code>, carries the file handle at byte 5 and the file size (big-endian, 4 bytes) at byte 7. Packets are padded to the remote's report length. <span class="chip ok">Verified</span></p>
+      </div>
+
+      <div class="tbl"><table>
+        <thead><tr><th>Cmd</th><th>Name</th><th>Used for</th></tr></thead>
+        <tbody class="num">
+          <tr><td class="mono">0x00</td><td>Ping</td><td>Check the remote responds. With one zero parameter it acts as a USB reset.</td></tr>
+          <tr><td class="mono">0x01</td><td>Open</td><td>Open a file: <code>/sys/sysinfo</code>, <code>/ir/ir_cap</code>, user config, firmware.</td></tr>
+          <tr><td class="mono">0x03</td><td>Write</td><td>Write user config or firmware data.</td></tr>
+          <tr><td class="mono">0x04</td><td>Read</td><td>Read system properties or captured IR.</td></tr>
+          <tr><td class="mono">0x05</td><td>Flush</td><td>Commit a config or firmware update.</td></tr>
+          <tr><td class="mono">0x06</td><td>DevCtrl</td><td>Stop IR learning, choose the checksum algorithm.</td></tr>
+          <tr><td class="mono">0x07</td><td>Close</td><td>Close a file, leave learning mode.</td></tr>
+          <tr><td class="mono">0xFF</td><td>Reset</td><td>Reset the remote. Parameter <code>0x66</code> resets its file system.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="caption">From the template for model 96, architecture 16, and the other Molson templates. <span class="chip ok">Verified</span></p>
+
+      <h3>Template engine</h3>
+      <p><code>Web.Driver.dll</code> embeds about 230 XML "ROM" templates covering Logitech remotes from the Harmony 510 to the Ultimate One. Each template defines <code>commandbuilder</code> steps: the packets to send, how many responses to expect, values to check, and values to store (for example <code>int:BE::file.size</code>). Placeholders like <code>%%remote.request.packet.length%%</code> are filled in at runtime. The same engine also understands an older plain-HID protocol.</p>
+    </section>
+
+    <section id="sync">
+      <h2>Sync flow</h2>
+      <p class="sub">What happens when you press Sync.</p>
+      <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  participant U as You
+  participant SL as Silverlight app
+  participant API as Logitech cloud
+  participant P as USB plugin
+  participant R as Harmony 600
+  U->>SL: Edit devices, activities, buttons
+  SL->>API: Save calls (devices, activities, button maps)
+  U->>SL: Press Sync
+  SL->>API: ICompileManager.StartCompile
+  API-->>SL: Compiled configuration
+  SL->>API: IRomDataLibrary.RequestOperationData
+  API-->>SL: Operation script and payload
+  loop Each template step
+    SL->>P: performOperation(deviceId, packets, n)
+    P->>R: HID report (Open, Write, Flush, Close)
+    R-->>P: Response
+    P-->>SL: Response bytes
+  end
+  SL->>R: Reset
+  SL->>API: IRemoteManager.RegisterSuccessfulSync
+</pre>
+      </div>
+      <p class="caption">The order and the device-side commands match the templates. Exactly which call returns the config binary is <span class="chip inf">Inferred</span> and should be confirmed by watching a sync.</p>
+      <h3>Learning IR</h3>
+      <p>The reverse path: put the remote in learning mode, open <code>/ir/ir_cap</code>, read the captured signal, send it to <code>IInfraredAnalysisManager.AnalyzeInfrared</code>, then save the result as a device command. <span class="chip inf">Inferred</span> for the cloud step.</p>
+    </section>
+
+    <section id="risks">
+      <h2>Risks</h2>
+      <div class="callout risk">
+        <p><span class="chip risk">Cloud dependency</span></p>
+        <p>The app has no offline mode. If <code>setup.myharmony.com</code> or <code>files.myharmony.com</code> goes away, the remote can no longer be reconfigured with this software.</p>
+      </div>
+      <div class="callout risk">
+        <p><span class="chip risk">Old runtime</span></p>
+        <p>Chrome 29 from 2013 runs with the sandbox off and loads remote code, alongside Silverlight 5, which Microsoft no longer supports. Run the app only while you need it.</p>
+      </div>
+      <div class="callout risk">
+        <p><span class="chip risk">Open debug port</span></p>
+        <p>The DevTools port <code>127.0.0.1:8088</code> needs no password. Any program on the PC could control the signed-in session while the app is open.</p>
+      </div>
+      <p class="caption">The <code>$ is not defined</code> lines in <code>console.log</code> are harmless. <code>InstallSoftware.js</code> loads before jQuery.</p>
+    </section>
+
+    <section id="evidence">
+      <h2>Evidence</h2>
+      <p class="sub">Where each finding came from. The extracted copies are in a temporary session folder and should be moved into the repo before it is cleaned up.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Source</th><th>Location</th><th>What it showed</th></tr></thead>
+        <tbody>
+          <tr><td>Install folder</td><td><code>C:\Program Files (x86)\Logitech\MyHarmony</code></td><td>Launcher, CEF shell, plugins, bundled Silverlight</td></tr>
+          <tr><td>HTTP cache</td><td><code>AppFiles\temp\data\f_*</code></td><td>Host page HTML and 9 unique XAP packages</td></tr>
+          <tr><td>Extracted XAPs</td><td>session folder <code>x\</code></td><td>Assemblies and service contracts</td></tr>
+          <tr><td>Device table</td><td>session folder <code>rom\r334.xml</code></td><td>VID/PID → model → templates</td></tr>
+          <tr><td>ROM templates</td><td>session folder <code>rom\r*.xml</code></td><td>Protocol steps per remote family</td></tr>
+          <tr><td>Page scripts</td><td>session folder <code>js\</code></td><td>Plugin init and Hub WebSocket client</td></tr>
+          <tr><td>Helper scripts</td><td>session folder <code>tools\</code></td><td><code>xap.py</code>, <code>ext.py</code>, <code>str.py</code>, <code>cdp.mjs</code></td></tr>
+          <tr><td>Live system</td><td>process list, TCP table, PnP devices</td><td>Process tree, endpoints, remote on USB</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="next">
+      <h2>Open threads</h2>
+      <p class="sub">Where to pick up next time, roughly in order.</p>
+      <ol class="threads">
+        <li><b>Move the extracted material into the repo</b><span>Copy the XAPs, templates, scripts and tools out of the temporary session folder.</span></li>
+        <li><b>Restart MyHarmony to free the DevTools slot</b><span>The first probe left Chrome 29's single debugger slot taken. After a restart, connect once with the raw client in <code>cdp.mjs</code>.</span></li>
+        <li><b>Record a real sync</b><span>Capture network and console traffic during one sync to confirm which call returns the config binary and fill in the inferred steps.</span></li>
+        <li><b>Decompile the driver</b><span>Open <code>Web.Driver.dll</code> and <code>RemoteSync.dll</code> in ILSpy to confirm how templates are chosen and how <code>performOperation</code> results are parsed.</span></li>
+        <li><b>Identify the exact model</b><span>Run only the read steps of <code>identifyremote</code> to learn whether the 600 reports model 66 or 96, plus its skin and firmware.</span></li>
+        <li><b>Offline backup</b><span>The templates include a read path for the user configuration. A read-only backup tool would protect the setup if Logitech's servers shut down.</span></li>
+      </ol>
+    </section>
+
+    <footer>Prepared with Claude from a read-only analysis of the running app. Nothing was written to the remote.</footer>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,theme:"neutral",securityLevel:"loose"});mermaid.run({querySelector:"pre.mermaid"}).then(function(){document.documentElement.dataset.rendered="1"});</script>
+</body>
+</html>

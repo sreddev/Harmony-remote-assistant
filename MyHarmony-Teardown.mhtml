@@ -1,0 +1,1529 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: http://127.0.0.1:8765/page.html
+Subject: MyHarmony Teardown
+Date: Thu, 12 Nov 2026 11:05:07 GMT
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--y7HeC3KsRd1KNgOTp9oTbZO6IigNpEaQ0zZkpbEKCN----"
+
+
+------MultipartBoundary--y7HeC3KsRd1KNgOTp9oTbZO6IigNpEaQ0zZkpbEKCN----
+Content-Type: text/html
+Content-ID: <frame-78666E7C4D67EF12B44BE8817772EA55@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://127.0.0.1:8765/page.html
+
+<!DOCTYPE html><html lang=3D"en" data-theme=3D"light"><head><meta http-equi=
+v=3D"Content-Type" content=3D"text/html; charset=3DUTF-8"><link rel=3D"styl=
+esheet" type=3D"text/css" href=3D"cid:css-c0e0c575-2d58-4850-9856-3899f97b7=
+abe@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:c=
+ss-f5c9bfe8-fcd1-420d-8288-827c2cb368a9@mhtml.blink" />
+
+<meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=3D1,=
+ viewport-fit=3Dcover">
+<title>MyHarmony Teardown</title>
+<meta name=3D"claude:viewport-fit-sides" content=3D"cover">
+<link rel=3D"stylesheet" href=3D"https://fonts.googleapis.com/css2?family=
+=3DIBM+Plex+Mono:wght@400;500&amp;family=3DIBM+Plex+Sans:wght@400;500;600&a=
+mp;family=3DSpace+Grotesk:wght@500;600&amp;display=3Dswap">
+
+
+</head>
+<body>
+
+<div class=3D"wrap">
+  <nav class=3D"toc" aria-label=3D"Contents">
+    <div class=3D"lbl">Contents</div>
+    <a href=3D"http://127.0.0.1:8765/page.html#glance">At a glance</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#stack">Layer stack</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#processes">Processes</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#app">Silverlight app</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#cloud">Cloud services</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#driver">USB driver</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#molson">Molson protocol</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#sync">Sync flow</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#risks">Risks</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#evidence">Evidence</a>
+    <a href=3D"http://127.0.0.1:8765/page.html#next">Open threads</a>
+  </nav>
+
+  <main>
+    <header class=3D"hero">
+      <div class=3D"eyebrow">Harmony-remote-assistant =C2=B7 field notes =
+=C2=B7 11 Nov 2026</div>
+      <h1>How MyHarmony drives a Harmony 600</h1>
+      <p class=3D"lede">A teardown of the running Logitech MyHarmony 1.0.1.=
+308 desktop app: what each layer does, which cloud services it calls, and t=
+he USB protocol it uses to read and write the remote.</p>
+      <div class=3D"legend">
+        <span><span class=3D"chip ok">Verified</span> seen in binaries, fil=
+es or the live system</span>
+        <span><span class=3D"chip inf">Inferred</span> deduced from names a=
+nd structure, not yet confirmed</span>
+      </div>
+    </header>
+
+    <section id=3D"glance">
+      <h2>At a glance</h2>
+      <div class=3D"facts">
+        <div class=3D"fact"><span class=3D"k">Remote on USB</span><span cla=
+ss=3D"v ir">046D:C122</span></div>
+        <div class=3D"fact"><span class=3D"k">Remote family</span><span cla=
+ss=3D"v">"Molson" (arch 14/16)</span></div>
+        <div class=3D"fact"><span class=3D"k">App version</span><span class=
+=3D"v">1.0.1.308</span></div>
+        <div class=3D"fact"><span class=3D"k">Browser engine</span><span cl=
+ass=3D"v">CEF 3.1547 / Chrome 29</span></div>
+        <div class=3D"fact"><span class=3D"k">App runtime</span><span class=
+=3D"v">Silverlight 5.1.20913</span></div>
+        <div class=3D"fact"><span class=3D"k">Logic lives</span><span class=
+=3D"v">setup.myharmony.com</span></div>
+      </div>
+      <p>The installed program is a browser shell plus a USB driver. Almost=
+ all logic, including the UI, the sync engine and the protocol scripts, is =
+downloaded from Logitech at runtime as Silverlight packages. Without Logite=
+ch's servers the app cannot do anything.</p>
+    </section>
+
+    <section id=3D"stack">
+      <h2>Layer stack</h2>
+      <p class=3D"sub">From the launcher you double-click down to the HID r=
+eports on the wire.</p>
+      <div class=3D"diagram">
+<pre class=3D"mermaid" data-processed=3D"true"><svg id=3D"mermaid-179448150=
+6153" width=3D"100%" xmlns=3D"http://www.w3.org/2000/svg" xmlns:xlink=3D"ht=
+tp://www.w3.org/1999/xlink" style=3D"max-width: 716.03125px;" viewBox=3D"-8=
+ -8 716.03125 1119.2171630859375" role=3D"graphics-document document" aria-=
+roledescription=3D"flowchart-v2"><style>#mermaid-1794481506153{font-family:=
+"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#000000;}#merma=
+id-1794481506153 .error-icon{fill:#552222;}#mermaid-1794481506153 .error-te=
+xt{fill:#552222;stroke:#552222;}#mermaid-1794481506153 .edge-thickness-norm=
+al{stroke-width:2px;}#mermaid-1794481506153 .edge-thickness-thick{stroke-wi=
+dth:3.5px;}#mermaid-1794481506153 .edge-pattern-solid{stroke-dasharray:0;}#=
+mermaid-1794481506153 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-179=
+4481506153 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-1794481506153 =
+.marker{fill:#666;stroke:#666;}#mermaid-1794481506153 .marker.cross{stroke:=
+#666;}#mermaid-1794481506153 svg{font-family:"trebuchet ms",verdana,arial,s=
+ans-serif;font-size:16px;}#mermaid-1794481506153 .label{font-family:"trebuc=
+het ms",verdana,arial,sans-serif;color:#000000;}#mermaid-1794481506153 .clu=
+ster-label text{fill:#333;}#mermaid-1794481506153 .cluster-label span,#merm=
+aid-1794481506153 p{color:#333;}#mermaid-1794481506153 .label text,#mermaid=
+-1794481506153 span,#mermaid-1794481506153 p{fill:#000000;color:#000000;}#m=
+ermaid-1794481506153 .node rect,#mermaid-1794481506153 .node circle,#mermai=
+d-1794481506153 .node ellipse,#mermaid-1794481506153 .node polygon,#mermaid=
+-1794481506153 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mermaid-=
+1794481506153 .flowchart-label text{text-anchor:middle;}#mermaid-1794481506=
+153 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mermaid-1794=
+481506153 .node .label{text-align:center;}#mermaid-1794481506153 .node.clic=
+kable{cursor:pointer;}#mermaid-1794481506153 .arrowheadPath{fill:#333333;}#=
+mermaid-1794481506153 .edgePath .path{stroke:#666;stroke-width:2.0px;}#merm=
+aid-1794481506153 .flowchart-link{stroke:#666;fill:none;}#mermaid-179448150=
+6153 .edgeLabel{background-color:white;text-align:center;}#mermaid-17944815=
+06153 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#merma=
+id-1794481506153 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#merm=
+aid-1794481506153 .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707=
+070;stroke-width:1px;}#mermaid-1794481506153 .cluster text{fill:#333;}#merm=
+aid-1794481506153 .cluster span,#mermaid-1794481506153 p{color:#333;}#merma=
+id-1794481506153 div.mermaidTooltip{position:absolute;text-align:center;max=
+-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-seri=
+f;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid =
+#707070;border-radius:2px;pointer-events:none;z-index:100;}#mermaid-1794481=
+506153 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}=
+#mermaid-1794481506153 :root{--mermaid-font-family:"trebuchet ms",verdana,a=
+rial,sans-serif;}</style><g><marker id=3D"mermaid-1794481506153_flowchart-p=
+ointEnd" class=3D"marker flowchart" viewBox=3D"0 0 10 10" refX=3D"6" refY=
+=3D"5" markerUnits=3D"userSpaceOnUse" markerWidth=3D"12" markerHeight=3D"12=
+" orient=3D"auto"><path d=3D"M 0 0 L 10 5 L 0 10 z" class=3D"arrowMarkerPat=
+h" style=3D"stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><mark=
+er id=3D"mermaid-1794481506153_flowchart-pointStart" class=3D"marker flowch=
+art" viewBox=3D"0 0 10 10" refX=3D"4.5" refY=3D"5" markerUnits=3D"userSpace=
+OnUse" markerWidth=3D"12" markerHeight=3D"12" orient=3D"auto"><path d=3D"M =
+0 5 L 10 10 L 10 0 z" class=3D"arrowMarkerPath" style=3D"stroke-width: 1; s=
+troke-dasharray: 1, 0;"></path></marker><marker id=3D"mermaid-1794481506153=
+_flowchart-circleEnd" class=3D"marker flowchart" viewBox=3D"0 0 10 10" refX=
+=3D"11" refY=3D"5" markerUnits=3D"userSpaceOnUse" markerWidth=3D"11" marker=
+Height=3D"11" orient=3D"auto"><circle cx=3D"5" cy=3D"5" r=3D"5" class=3D"ar=
+rowMarkerPath" style=3D"stroke-width: 1; stroke-dasharray: 1, 0;"></circle>=
+</marker><marker id=3D"mermaid-1794481506153_flowchart-circleStart" class=
+=3D"marker flowchart" viewBox=3D"0 0 10 10" refX=3D"-1" refY=3D"5" markerUn=
+its=3D"userSpaceOnUse" markerWidth=3D"11" markerHeight=3D"11" orient=3D"aut=
+o"><circle cx=3D"5" cy=3D"5" r=3D"5" class=3D"arrowMarkerPath" style=3D"str=
+oke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id=3D"merm=
+aid-1794481506153_flowchart-crossEnd" class=3D"marker cross flowchart" view=
+Box=3D"0 0 11 11" refX=3D"12" refY=3D"5.2" markerUnits=3D"userSpaceOnUse" m=
+arkerWidth=3D"11" markerHeight=3D"11" orient=3D"auto"><path d=3D"M 1,1 l 9,=
+9 M 10,1 l -9,9" class=3D"arrowMarkerPath" style=3D"stroke-width: 2; stroke=
+-dasharray: 1, 0;"></path></marker><marker id=3D"mermaid-1794481506153_flow=
+chart-crossStart" class=3D"marker cross flowchart" viewBox=3D"0 0 11 11" re=
+fX=3D"-1" refY=3D"5.2" markerUnits=3D"userSpaceOnUse" markerWidth=3D"11" ma=
+rkerHeight=3D"11" orient=3D"auto"><path d=3D"M 1,1 l 9,9 M 10,1 l -9,9" cla=
+ss=3D"arrowMarkerPath" style=3D"stroke-width: 2; stroke-dasharray: 1, 0;"><=
+/path></marker><g class=3D"root"><g class=3D"clusters"></g><g class=3D"edge=
+Paths"><path d=3D"M396.684,66.188L376.329,72.487C355.974,78.786,315.265,91.=
+385,294.91,104.514C274.555,117.642,274.555,131.299,274.555,138.128L274.555,=
+144.957" id=3D"L-L-S-0" class=3D" edge-thickness-normal edge-pattern-solid =
+flowchart-link LS-L LE-S" style=3D"fill:none;" marker-end=3D"url(#mermaid-1=
+794481506153_flowchart-pointEnd)"></path><path d=3D"M259.285,216.444L254.74=
+3,226.289C250.201,236.134,241.116,255.824,240.458,273.313C239.8,290.803,247=
+.569,306.093,251.454,313.737L255.338,321.382" id=3D"L-S-PG-0" class=3D" edg=
+e-thickness-normal edge-pattern-solid flowchart-link LS-S LE-PG" style=3D"f=
+ill:none;" marker-end=3D"url(#mermaid-1794481506153_flowchart-pointEnd)"></=
+path><path d=3D"M289.824,216.444L294.366,226.289C298.909,236.134,307.993,25=
+5.824,308.651,273.313C309.309,290.803,301.54,306.093,297.656,313.737L293.77=
+1,321.382" id=3D"L-S-PG-1" class=3D" edge-thickness-normal edge-pattern-dot=
+ted flowchart-link LS-S LE-PG" style=3D"fill:none;stroke-width:2px;stroke-d=
+asharray:3;" marker-end=3D"url(#mermaid-1794481506153_flowchart-pointEnd)">=
+</path><path d=3D"M274.555,392.295L274.555,396.461C274.555,400.628,274.555,=
+408.961,274.555,416.411C274.555,423.861,274.555,430.428,274.555,433.711L274=
+.555,436.995" id=3D"L-PG-SL-0" class=3D" edge-thickness-normal edge-pattern=
+-solid flowchart-link LS-PG LE-SL" style=3D"fill:none;" marker-end=3D"url(#=
+mermaid-1794481506153_flowchart-pointEnd)"></path><path d=3D"M220.119,508.4=
+82L206.249,516.915C192.379,525.347,164.639,542.211,150.769,561.854C136.898,=
+581.497,136.898,603.918,136.898,615.129L136.898,626.339" id=3D"L-SL-NP-0" c=
+lass=3D" edge-thickness-normal edge-pattern-solid flowchart-link LS-SL LE-N=
+P" style=3D"fill:none;" marker-end=3D"url(#mermaid-1794481506153_flowchart-=
+pointEnd)"></path><path d=3D"M136.898,697.827L136.898,705.655C136.898,713.4=
+83,136.898,729.14,136.898,740.252C136.898,751.363,136.898,757.93,136.898,76=
+1.213L136.898,764.497" id=3D"L-NP-SDE-0" class=3D" edge-thickness-normal ed=
+ge-pattern-solid flowchart-link LS-NP LE-SDE" style=3D"fill:none;" marker-e=
+nd=3D"url(#mermaid-1794481506153_flowchart-pointEnd)"></path><path d=3D"M13=
+6.898,835.984L136.898,840.151C136.898,844.317,136.898,852.651,136.898,860.1=
+01C136.898,867.551,136.898,874.117,136.898,877.401L136.898,880.684" id=3D"L=
+-SDE-USB-0" class=3D" edge-thickness-normal edge-pattern-solid flowchart-li=
+nk LS-SDE LE-USB" style=3D"fill:none;" marker-end=3D"url(#mermaid-179448150=
+6153_flowchart-pointEnd)"></path><path d=3D"M136.898,952.172L136.898,956.33=
+8C136.898,960.505,136.898,968.838,136.898,976.288C136.898,983.738,136.898,9=
+90.305,136.898,993.588L136.898,996.872" id=3D"L-USB-R-0" class=3D" edge-thi=
+ckness-normal edge-pattern-solid flowchart-link LS-USB LE-R" style=3D"fill:=
+none;" marker-end=3D"url(#mermaid-1794481506153_flowchart-pointEnd)"></path=
+><path d=3D"M328.99,508.482L342.86,516.915C356.73,525.347,384.471,542.211,3=
+98.341,558.193C412.211,574.174,412.211,589.272,412.211,596.821L412.211,604.=
+37" id=3D"L-SL-C-0" class=3D" edge-thickness-normal edge-pattern-solid flow=
+chart-link LS-SL LE-C" style=3D"fill:none;" marker-end=3D"url(#mermaid-1794=
+481506153_flowchart-pointEnd)"></path><path d=3D"M503.617,66.188L503.617,72=
+.487C503.617,78.786,503.617,91.385,503.617,103.101C503.617,114.817,503.617,=
+125.649,503.617,131.065L503.617,136.481" id=3D"L-L-U-0" class=3D" edge-thic=
+kness-normal edge-pattern-dotted flowchart-link LS-L LE-U" style=3D"fill:no=
+ne;stroke-width:2px;stroke-dasharray:3;" marker-end=3D"url(#mermaid-1794481=
+506153_flowchart-pointEnd)"></path><path d=3D"M579.294,66.188L593.7,72.487C=
+608.105,78.786,636.916,91.385,651.321,104.611C665.727,117.837,665.727,131.6=
+9,665.727,138.616L665.727,145.542" id=3D"L-L-G-0" class=3D" edge-thickness-=
+normal edge-pattern-dotted flowchart-link LS-L LE-G" style=3D"fill:none;str=
+oke-width:2px;stroke-dasharray:3;" marker-end=3D"url(#mermaid-1794481506153=
+_flowchart-pointEnd)"></path></g><g class=3D"edgeLabels"><g class=3D"edgeLa=
+bel"><g class=3D"label" transform=3D"translate(0, 0)"><foreignObject width=
+=3D"0" height=3D"0"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"di=
+splay: inline-block; white-space: nowrap;"><span class=3D"edgeLabel"></span=
+></div></foreignObject></g></g><g class=3D"edgeLabel"><g class=3D"label" tr=
+ansform=3D"translate(0, 0)"><foreignObject width=3D"0" height=3D"0"><div xm=
+lns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-=
+space: nowrap;"><span class=3D"edgeLabel"></span></div></foreignObject></g>=
+</g><g class=3D"edgeLabel" transform=3D"translate(317.078125, 275.513519287=
+1094)"><g class=3D"label" transform=3D"translate(-65.046875, -25.59375)"><f=
+oreignObject width=3D"130.09375" height=3D"51.1875"><div xmlns=3D"http://ww=
+w.w3.org/1999/xhtml" style=3D"display: inline-block; white-space: nowrap;">=
+<span class=3D"edgeLabel">window.jsHandler<br>(app helpers only)</span></di=
+v></foreignObject></g></g><g class=3D"edgeLabel"><g class=3D"label" transfo=
+rm=3D"translate(0, 0)"><foreignObject width=3D"0" height=3D"0"><div xmlns=
+=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-spa=
+ce: nowrap;"><span class=3D"edgeLabel"></span></div></foreignObject></g></g=
+><g class=3D"edgeLabel" transform=3D"translate(136.8984375, 559.07601928710=
+94)"><g class=3D"label" transform=3D"translate(-117.140625, -25.59375)"><fo=
+reignObject width=3D"234.28125" height=3D"51.1875"><div xmlns=3D"http://www=
+.w3.org/1999/xhtml" style=3D"display: inline-block; white-space: nowrap;"><=
+span class=3D"edgeLabel">HtmlPage invoke<br>remoteEngine.performOperation</=
+span></div></foreignObject></g></g><g class=3D"edgeLabel"><g class=3D"label=
+" transform=3D"translate(0, 0)"><foreignObject width=3D"0" height=3D"0"><di=
+v xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; wh=
+ite-space: nowrap;"><span class=3D"edgeLabel"></span></div></foreignObject>=
+</g></g><g class=3D"edgeLabel"><g class=3D"label" transform=3D"translate(0,=
+ 0)"><foreignObject width=3D"0" height=3D"0"><div xmlns=3D"http://www.w3.or=
+g/1999/xhtml" style=3D"display: inline-block; white-space: nowrap;"><span c=
+lass=3D"edgeLabel"></span></div></foreignObject></g></g><g class=3D"edgeLab=
+el"><g class=3D"label" transform=3D"translate(0, 0)"><foreignObject width=
+=3D"0" height=3D"0"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"di=
+splay: inline-block; white-space: nowrap;"><span class=3D"edgeLabel"></span=
+></div></foreignObject></g></g><g class=3D"edgeLabel" transform=3D"translat=
+e(412.2109375, 559.0760192871094)"><g class=3D"label" transform=3D"translat=
+e(-61.609375, -12.796875)"><foreignObject width=3D"123.21875" height=3D"25.=
+59375"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline=
+-block; white-space: nowrap;"><span class=3D"edgeLabel">SOAP over HTTPS</sp=
+an></div></foreignObject></g></g><g class=3D"edgeLabel" transform=3D"transl=
+ate(503.6171875, 103.984375)"><g class=3D"label" transform=3D"translate(-28=
+.265625, -12.796875)"><foreignObject width=3D"56.53125" height=3D"25.59375"=
+><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block=
+; white-space: nowrap;"><span class=3D"edgeLabel">updates</span></div></for=
+eignObject></g></g><g class=3D"edgeLabel" transform=3D"translate(665.726562=
+5, 103.984375)"><g class=3D"label" transform=3D"translate(-34.3046875, -12.=
+796875)"><foreignObject width=3D"68.609375" height=3D"25.59375"><div xmlns=
+=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-spa=
+ce: nowrap;"><span class=3D"edgeLabel">error logs</span></div></foreignObje=
+ct></g></g></g><g class=3D"nodes"><g class=3D"node default default flowchar=
+t-label" id=3D"flowchart-L-0" data-node=3D"true" data-id=3D"L" transform=3D=
+"translate(503.6171875, 33.09375)"><rect class=3D"basic label-container" st=
+yle=3D"" rx=3D"0" ry=3D"0" x=3D"-121.5859375" y=3D"-33.09375" width=3D"243.=
+171875" height=3D"66.1875"></rect><g class=3D"label" style=3D"" transform=
+=3D"translate(-114.0859375, -25.59375)"><rect></rect><foreignObject width=
+=3D"228.171875" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xht=
+ml" style=3D"display: inline-block; white-space: nowrap;"><span class=3D"no=
+deLabel">MyHarmonyLauncher.exe (.NET)<br>update check, unzip AppFiles</span=
+></div></foreignObject></g></g><g class=3D"node default default flowchart-l=
+abel" id=3D"flowchart-S-1" data-node=3D"true" data-id=3D"S" transform=3D"tr=
+anslate(274.5546875, 183.3505096435547)"><rect class=3D"basic label-contain=
+er" style=3D"" rx=3D"0" ry=3D"0" x=3D"-97.1328125" y=3D"-33.09375" width=3D=
+"194.265625" height=3D"66.1875"></rect><g class=3D"label" style=3D"" transf=
+orm=3D"translate(-89.6328125, -25.59375)"><rect></rect><foreignObject width=
+=3D"179.265625" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xht=
+ml" style=3D"display: inline-block; white-space: nowrap;"><span class=3D"no=
+deLabel">MyHarmony.exe<br>CEF 3.1547 browser shell</span></div></foreignObj=
+ect></g></g><g class=3D"node default default flowchart-label" id=3D"flowcha=
+rt-PG-3" data-node=3D"true" data-id=3D"PG" transform=3D"translate(274.55468=
+75, 359.2010192871094)"><rect class=3D"basic label-container" style=3D"" rx=
+=3D"0" ry=3D"0" x=3D"-138.0234375" y=3D"-33.09375" width=3D"276.046875" hei=
+ght=3D"66.1875"></rect><g class=3D"label" style=3D"" transform=3D"translate=
+(-130.5234375, -25.59375)"><rect></rect><foreignObject width=3D"261.046875"=
+ height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"di=
+splay: inline-block; white-space: nowrap;"><span class=3D"nodeLabel">Render=
+er: harmonyconfig page<br>JSHarmonyUtil.js, HarmonyConfig.js</span></div></=
+foreignObject></g></g><g class=3D"node default default flowchart-label" id=
+=3D"flowchart-SL-7" data-node=3D"true" data-id=3D"SL" transform=3D"translat=
+e(274.5546875, 475.3885192871094)"><rect class=3D"basic label-container" st=
+yle=3D"" rx=3D"0" ry=3D"0" x=3D"-120.0546875" y=3D"-33.09375" width=3D"240.=
+109375" height=3D"66.1875"></rect><g class=3D"label" style=3D"" transform=
+=3D"translate(-112.5546875, -25.59375)"><rect></rect><foreignObject width=
+=3D"225.109375" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xht=
+ml" style=3D"display: inline-block; white-space: nowrap;"><span class=3D"no=
+deLabel">Silverlight 5 plugin process<br>MartiniWeb app (XAP packages)</spa=
+n></div></foreignObject></g></g><g class=3D"node default default flowchart-=
+label" id=3D"flowchart-NP-9" data-node=3D"true" data-id=3D"NP" transform=3D=
+"translate(136.8984375, 664.733154296875)"><rect class=3D"basic label-conta=
+iner" style=3D"" rx=3D"0" ry=3D"0" x=3D"-136.8984375" y=3D"-33.09375" width=
+=3D"273.796875" height=3D"66.1875"></rect><g class=3D"label" style=3D"" tra=
+nsform=3D"translate(-129.3984375, -25.59375)"><rect></rect><foreignObject w=
+idth=3D"258.796875" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999=
+/xhtml" style=3D"display: inline-block; white-space: nowrap;"><span class=
+=3D"nodeLabel">NprtHarmonyPlugin.dll<br>NPAPI, application/x-harmonyplugin<=
+/span></div></foreignObject></g></g><g class=3D"node default default flowch=
+art-label" id=3D"flowchart-SDE-11" data-node=3D"true" data-id=3D"SDE" trans=
+form=3D"translate(136.8984375, 802.8902893066406)"><rect class=3D"basic lab=
+el-container" style=3D"" rx=3D"0" ry=3D"0" x=3D"-113.7421875" y=3D"-33.0937=
+5" width=3D"227.484375" height=3D"66.1875"></rect><g class=3D"label" style=
+=3D"" transform=3D"translate(-106.2421875, -25.59375)"><rect></rect><foreig=
+nObject width=3D"212.484375" height=3D"51.1875"><div xmlns=3D"http://www.w3=
+.org/1999/xhtml" style=3D"display: inline-block; white-space: nowrap;"><spa=
+n class=3D"nodeLabel">SDE.dll<br>remote manager, HID channel</span></div></=
+foreignObject></g></g><g class=3D"node default default flowchart-label" id=
+=3D"flowchart-USB-13" data-node=3D"true" data-id=3D"USB" transform=3D"trans=
+late(136.8984375, 919.0777893066406)"><rect class=3D"basic label-container"=
+ style=3D"" rx=3D"0" ry=3D"0" x=3D"-134.9375" y=3D"-33.09375" width=3D"269.=
+875" height=3D"66.1875"></rect><g class=3D"label" style=3D"" transform=3D"t=
+ranslate(-127.4375, -25.59375)"><rect></rect><foreignObject width=3D"254.87=
+5" height=3D"51.1875"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"=
+display: inline-block; white-space: nowrap;"><span class=3D"nodeLabel">UsbD=
+evice.dll<br>Windows HID.DLL + DeviceIoControl</span></div></foreignObject>=
+</g></g><g class=3D"node default default flowchart-label" id=3D"flowchart-R=
+-15" label-offset-y=3D"11.622073578595318" data-node=3D"true" data-id=3D"R"=
+ transform=3D"translate(136.8984375, 1052.6943893432617)"><path style=3D"" =
+d=3D"M 0,11.622073578595318 a 54.296875,11.622073578595318 0,0,0 108.59375 =
+0 a 54.296875,11.622073578595318 0,0,0 -108.59375 0 l 0,77.80957357859532 a=
+ 54.296875,11.622073578595318 0,0,0 108.59375 0 l 0,-77.80957357859532" tra=
+nsform=3D"translate(-54.296875,-50.52686036789298)"></path><g class=3D"labe=
+l" style=3D"" transform=3D"translate(-46.796875, -25.59375)"><rect></rect><=
+foreignObject width=3D"93.59375" height=3D"51.1875"><div xmlns=3D"http://ww=
+w.w3.org/1999/xhtml" style=3D"display: inline-block; white-space: nowrap;">=
+<span class=3D"nodeLabel">Harmony 600<br>046D:C122</span></div></foreignObj=
+ect></g></g><g class=3D"node default default flowchart-label" id=3D"flowcha=
+rt-C-17" label-offset-y=3D"14.646425428379146" data-node=3D"true" data-id=
+=3D"C" transform=3D"translate(412.2109375, 664.733154296875)"><path style=
+=3D"" d=3D"M 0,14.646425428379146 a 88.4140625,14.646425428379146 0,0,0 176=
+.828125 0 a 88.4140625,14.646425428379146 0,0,0 -176.828125 0 l 0,80.833925=
+42837915 a 88.4140625,14.646425428379146 0,0,0 176.828125 0 l 0,-80.8339254=
+2837915" transform=3D"translate(-88.4140625,-55.06338814256872)"></path><g =
+class=3D"label" style=3D"" transform=3D"translate(-80.9140625, -25.59375)">=
+<rect></rect><foreignObject width=3D"161.828125" height=3D"51.1875"><div xm=
+lns=3D"http://www.w3.org/1999/xhtml" style=3D"display: inline-block; white-=
+space: nowrap;"><span class=3D"nodeLabel">Logitech cloud<br>setup.myharmony=
+.com</span></div></foreignObject></g></g><g class=3D"node default default f=
+lowchart-label" id=3D"flowchart-U-19" label-offset-y=3D"14.181587061178124"=
+ data-node=3D"true" data-id=3D"U" transform=3D"translate(503.6171875, 183.3=
+505096435547)"><path style=3D"" d=3D"M 0,14.181587061178124 a 81.9296875,14=
+.181587061178124 0,0,0 163.859375 0 a 81.9296875,14.181587061178124 0,0,0 -=
+163.859375 0 l 0,54.77533706117812 a 81.9296875,14.181587061178124 0,0,0 16=
+3.859375 0 l 0,-54.77533706117812" transform=3D"translate(-81.9296875,-41.5=
+6925559176719)"></path><g class=3D"label" style=3D"" transform=3D"translate=
+(-74.4296875, -12.796875)"><rect></rect><foreignObject width=3D"148.859375"=
+ height=3D"25.59375"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"d=
+isplay: inline-block; white-space: nowrap;"><span class=3D"nodeLabel">app.m=
+yharmony.com</span></div></foreignObject></g></g><g class=3D"node default d=
+efault flowchart-label" id=3D"flowchart-G-21" label-offset-y=3D"8.140858130=
+321167" data-node=3D"true" data-id=3D"G" transform=3D"translate(665.7265625=
+, 183.3505096435547)"><path style=3D"" d=3D"M 0,8.140858130321167 a 30.1796=
+875,8.140858130321167 0,0,0 60.359375 0 a 30.1796875,8.140858130321167 0,0,=
+0 -60.359375 0 l 0,48.73460813032116 a 30.1796875,8.140858130321167 0,0,0 6=
+0.359375 0 l 0,-48.73460813032116" transform=3D"translate(-30.1796875,-32.5=
+08162195481745)"></path><g class=3D"label" style=3D"" transform=3D"translat=
+e(-22.6796875, -12.796875)"><rect></rect><foreignObject width=3D"45.359375"=
+ height=3D"25.59375"><div xmlns=3D"http://www.w3.org/1999/xhtml" style=3D"d=
+isplay: inline-block; white-space: nowrap;"><span class=3D"nodeLabel">Loggl=
+y</span></div></foreignObject></g></g></g></g></g></svg></pre>
+      </div>
+      <p class=3D"caption">Solid arrows carry the main work. Dotted arrows =
+are support paths. <span class=3D"chip ok">Verified</span></p>
+    </section>
+
+    <section id=3D"processes">
+      <h2>Processes</h2>
+      <p class=3D"sub">The process tree observed while the app was open.</p=
+>
+      <div class=3D"tbl"><table>
+        <thead><tr><th>PID</th><th>Process</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td class=3D"mono num">47788</td><td><code>MyHarmonyLauncher.=
+exe</code></td><td>Checks for updates, extracts <code>AppFiles.zip</code>, =
+starts the shell with <code>version;configUrl;logUrl;recoveryToolUrl;lang</=
+code>, then exits.</td></tr>
+          <tr><td class=3D"mono num">48520</td><td><code>MyHarmony.exe</cod=
+e></td><td>Main browser process. Opens <code>/MartiniWeb/Account/harmonycon=
+fig</code>. Listens on <code>127.0.0.1:8088</code> (DevTools).</td></tr>
+          <tr><td class=3D"mono num">43964</td><td><code>--type=3Drenderer =
+--no-sandbox</code></td><td>Renders the web page and runs its JavaScript.</=
+td></tr>
+          <tr><td class=3D"mono num">36356</td><td><code>--type=3Dplugin Np=
+rtHarmonyPlugin.dll</code></td><td>Logitech's USB plugin. Talks to the remo=
+te.</td></tr>
+          <tr><td class=3D"mono num">50592</td><td><code>--type=3Dplugin np=
+ctrl.dll</code></td><td>Bundled Microsoft Silverlight 5. Runs the MartiniWe=
+b app.</td></tr>
+        </tbody>
+      </table></div>
+      <p class=3D"caption">The Logitech Options+ processes on the machine a=
+re unrelated. <span class=3D"chip ok">Verified</span></p>
+    </section>
+
+    <section id=3D"app">
+      <h2>Silverlight app ("MartiniWeb")</h2>
+      <p class=3D"sub">The app is split into packages that load on demand. =
+These were in the local cache.</p>
+      <div class=3D"tbl"><table>
+        <thead><tr><th>Package</th><th>What it does</th><th>Notable assembl=
+ies</th></tr></thead>
+        <tbody>
+          <tr><td><code>BootStrapper</code></td><td>First package loaded. D=
+ownloads the rest.</td><td class=3D"ops">Web.MartiniWeb.Downloader</td></tr=
+>
+          <tr><td><code>Core</code></td><td>Shell, dependency injection, da=
+ta access, protocol driver.</td><td class=3D"ops">Web.Driver, Engine.Remote=
+Communicator, Data.HarmonyPlatform, Data.DesktopServices, Data.RestPlatform=
+, Prism, Ninject</td></tr>
+          <tr><td><code>Account.Login</code></td><td>Sign in, create accoun=
+t.</td><td class=3D"ops">Data.HarmonyPlatform</td></tr>
+          <tr><td><code>Account.Management</code></td><td>Account settings.=
+</td><td class=3D"ops">=E2=80=94</td></tr>
+          <tr><td><code>Dashboard.Main</code></td><td>Home screen: devices,=
+ activities, remote.</td><td class=3D"ops">ButtonMapping, ButtonMappingUtil=
+s</td></tr>
+          <tr><td><code>Device.AddDevice</code></td><td>Search and add a TV=
+, AV receiver and so on.</td><td class=3D"ops">Driver, RemoteCommunicator, =
+Activity.Setup</td></tr>
+          <tr><td><code>Activity.Setup</code></td><td>Build activities like=
+ "Watch TV".</td><td class=3D"ops">RemoteSync, ButtonMapping</td></tr>
+          <tr><td><code>ActivityRemote.ButtonMapping</code></td><td>Customi=
+ze buttons per activity or device.</td><td class=3D"ops">ButtonMappingUtils=
+</td></tr>
+          <tr><td><code>Remote.RemoteSync</code></td><td>The sync screen an=
+d progress.</td><td class=3D"ops">=E2=80=94</td></tr>
+        </tbody>
+      </table></div>
+      <h3>JavaScript bridge</h3>
+      <p>The page creates the USB plugin as <code>&lt;object id=3D"HarmonyP=
+lugin" type=3D"application/x-harmonyplugin"&gt;</code> and stores it in the=
+ global <code>remoteEngine</code>. The Silverlight driver calls it through =
+the browser bridge. It first checks for <code>window.jsHandler</code>. In t=
+his shell, <code>jsHandler</code> only offers <code>clearCache</code>, <cod=
+e>getAppVersion</code>, <code>getKeyBoardLocale</code>, <code>getKeyboardLa=
+yout</code> and <code>silverlightLoaded</code>, so all device I/O goes to t=
+he plugin. <span class=3D"chip ok">Verified</span></p>
+      <p><code>HarmonyConfig.js</code> also contains a WebSocket client tha=
+t sends <code>hbus</code> commands to a Harmony Hub through the cloud. It i=
+s not used with a 600.</p>
+    </section>
+
+    <section id=3D"cloud">
+      <h2>Cloud services</h2>
+      <p class=3D"sub">WCF SOAP contracts found in the app's assemblies. Yo=
+ur account, devices, activities and button maps all live here.</p>
+      <div class=3D"tbl"><table>
+        <thead><tr><th>Contract</th><th>Purpose</th><th>Key operations</th>=
+</tr></thead>
+        <tbody>
+          <tr><td><code>ISecurity</code><br><code>ILinkSecurity</code></td>=
+<td>Sign-in and tokens</td><td class=3D"ops">LoginUser, SignIn, SignUp, Get=
+UserAuthToken, ResetPassword, IsLoggedIn, LogoutUser</td></tr>
+          <tr><td><code>IAccountManager</code></td><td>Account and househol=
+d</td><td class=3D"ops">GetMyAccount, GetMyHousehold, UpdateMyAccountProper=
+ties, SaveEmailPreferences, StartSetupSession</td></tr>
+          <tr><td><code>IDeviceManager</code><br><code>IGlobalDeviceManager=
+</code></td><td>Logitech's device database</td><td class=3D"ops">SearchGlob=
+alDevices, SearchManufacturers, GetCommands, GetCommandsToLearnForConnected=
+Remote, GetMyDevices, UpdateMyData, GetInputInfo</td></tr>
+          <tr><td><code>IActivityManager</code></td><td>Activities</td><td =
+class=3D"ops">GetActivities, SaveActivities, GetRecommendedActivities, Reso=
+lvePrimaryDeviceForActivity, ResetActivitiesToDefault</td></tr>
+          <tr><td><code>IUserButtonMappingManager</code></td><td>Button lay=
+out</td><td class=3D"ops">GetButtonMaps, SaveButtonMaps, SaveSequence, GetR=
+emoteCanvas, RestoreToDefaultButtonMaps</td></tr>
+          <tr><td><code>IUserFeatureManager</code></td><td>Device features<=
+/td><td class=3D"ops">GetUserFeatures, SaveUserFeatures, CopyFeaturesFromGl=
+obalDevice</td></tr>
+          <tr><td><code>IRemoteManager</code></td><td>The remote's record</=
+td><td class=3D"ops">GetRemote, GetRemoteSettings, SaveRemoteSettings, GetS=
+yncStatus, RegisterSuccessfulSync, AcceptLicenseAgreement</td></tr>
+          <tr><td><code>ICompileManager</code></td><td>Builds the remote's =
+config</td><td class=3D"ops">StartCompile, StartCompileWithLocale, IsRemote=
+SyncRequired, IsUserConfigChanged</td></tr>
+          <tr><td><code>IRomDataLibrary</code></td><td>Protocol scripts and=
+ payloads</td><td class=3D"ops">RequestRomData, RequestOperationData (RomDa=
+taService.svc)</td></tr>
+          <tr><td><code>IInfraredAnalysisManager</code></td><td>Decodes lea=
+rned IR</td><td class=3D"ops">AnalyzeInfrared</td></tr>
+          <tr><td><code>IUserAccountDirector</code></td><td>Facade over mos=
+t of the above</td><td class=3D"ops">GetDeviceList, GetActivities, GetButto=
+nMaps, PutSettings, UpgradeConfig, SubmitUserDataLogs, =E2=80=A6</td></tr>
+          <tr><td><code>IProductManager</code>, <code>IDiscovery</code>, <c=
+ode>IPlatformService</code></td><td>Products, service discovery, health</td=
+><td class=3D"ops">GetHarmonyProducts, GetAllServices, Ping, BuildInfo</td>=
+</tr>
+        </tbody>
+      </table></div>
+      <p class=3D"caption">Contract and operation names: <span class=3D"chi=
+p ok">Verified</span>. Purposes are read from the names: <span class=3D"chi=
+p inf">Inferred</span></p>
+    </section>
+
+    <section id=3D"driver">
+      <h2>USB driver</h2>
+      <p class=3D"sub">Three native 32-bit DLLs in <code>AppFiles\PlugIns\H=
+armonyRemoteDriver_32</code>. They use the standard Windows HID driver, wit=
+h no custom kernel driver.</p>
+      <div class=3D"tbl"><table>
+        <thead><tr><th>Plugin call</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>getDevices()</code></td><td>Lists connected remotes=
+ with token, VID, PID, skin and report lengths.</td></tr>
+          <tr><td><code>addUsbDevice(vid, pid)</code></td><td>Registers a V=
+ID/PID pair to watch for.</td></tr>
+          <tr><td><code>getAttributeByKey(key)</code></td><td>Reads a plugi=
+n attribute, e.g. <code>plugin_version</code>.</td></tr>
+          <tr><td><code>performOperation(deviceId, packets, numberOfRespons=
+es)</code></td><td>Sends HID packets and returns the responses. Every proto=
+col step uses this.</td></tr>
+          <tr><td><code>cancelCommand(deviceId)</code></td><td>Aborts the r=
+unning command.</td></tr>
+          <tr><td><code>cleanupRemote()</code>, <code>cleanupAll()</code></=
+td><td>Releases handles.</td></tr>
+        </tbody>
+      </table></div>
+      <p><code>SDE.dll</code> holds the remote manager and HID channel clas=
+ses. <code>UsbDevice.dll</code> exports <code>OpenChannel</code>, <code>Rea=
+d</code>, <code>Write</code>, <code>GetVendorId</code>, <code>GetProductId<=
+/code> and the input/output packet sizes, and calls <code>HidD_*</code> plu=
+s <code>DeviceIoControl</code>. <span class=3D"chip ok">Verified</span></p>
+    </section>
+
+    <section id=3D"molson">
+      <h2>Molson protocol</h2>
+      <p class=3D"sub">The protocol family the driver's device table assign=
+s to <code>046D:C122</code>. It works like a tiny file system over HID.</p>
+      <p>The driver's config lists two Molson entries for this PID: model 9=
+6 (skins 91=E2=80=9396, "Martini") and model 66 (skins 66=E2=80=9375, "Memb=
+er Web"). Both support five operations: <code>identifyremote</code>, <code>=
+connectivity</code>, <code>userconfiguration</code>, <code>learnir</code> a=
+nd <code>firmwareupgrade</code>. Which model your 600 reports is still to b=
+e confirmed.</p>
+
+      <div class=3D"packet">
+        <h3>Request packet</h3>
+        <div class=3D"bytes" role=3D"img" aria-label=3D"Packet layout: serv=
+ice ID, command ID, sequence number, parameter count, then parameters">
+          <div class=3D"byte hdr"><span class=3D"off">byte 0</span><span cl=
+ass=3D"val">0xFF</span><span class=3D"nm">service ID</span></div>
+          <div class=3D"byte hdr"><span class=3D"off">byte 1</span><span cl=
+ass=3D"val">cmd</span><span class=3D"nm">command ID</span></div>
+          <div class=3D"byte hdr"><span class=3D"off">byte 2</span><span cl=
+ass=3D"val">seq</span><span class=3D"nm">sequence no.</span></div>
+          <div class=3D"byte hdr"><span class=3D"off">byte 3</span><span cl=
+ass=3D"val">n</span><span class=3D"nm">param count</span></div>
+          <div class=3D"byte prm"><span class=3D"off">byte 4=E2=80=A6</span=
+><span class=3D"val">params</span><span class=3D"nm">byte, word, dword or s=
+tring</span></div>
+        </div>
+        <p class=3D"caption">Example: open the system info file is <code>FF=
+ 01 00 02 "/sys/sysinfo" "R"</code>. The response echoes <code>FF 01</code>=
+, carries the file handle at byte 5 and the file size (big-endian, 4 bytes)=
+ at byte 7. Packets are padded to the remote's report length. <span class=
+=3D"chip ok">Verified</span></p>
+      </div>
+
+      <div class=3D"tbl"><table>
+        <thead><tr><th>Cmd</th><th>Name</th><th>Used for</th></tr></thead>
+        <tbody class=3D"num">
+          <tr><td class=3D"mono">0x00</td><td>Ping</td><td>Check the remote=
+ responds. With one zero parameter it acts as a USB reset.</td></tr>
+          <tr><td class=3D"mono">0x01</td><td>Open</td><td>Open a file: <co=
+de>/sys/sysinfo</code>, <code>/ir/ir_cap</code>, user config, firmware.</td=
+></tr>
+          <tr><td class=3D"mono">0x03</td><td>Write</td><td>Write user conf=
+ig or firmware data.</td></tr>
+          <tr><td class=3D"mono">0x04</td><td>Read</td><td>Read system prop=
+erties or captured IR.</td></tr>
+          <tr><td class=3D"mono">0x05</td><td>Flush</td><td>Commit a config=
+ or firmware update.</td></tr>
+          <tr><td class=3D"mono">0x06</td><td>DevCtrl</td><td>Stop IR learn=
+ing, choose the checksum algorithm.</td></tr>
+          <tr><td class=3D"mono">0x07</td><td>Close</td><td>Close a file, l=
+eave learning mode.</td></tr>
+          <tr><td class=3D"mono">0xFF</td><td>Reset</td><td>Reset the remot=
+e. Parameter <code>0x66</code> resets its file system.</td></tr>
+        </tbody>
+      </table></div>
+      <p class=3D"caption">From the template for model 96, architecture 16,=
+ and the other Molson templates. <span class=3D"chip ok">Verified</span></p=
+>
+
+      <h3>Template engine</h3>
+      <p><code>Web.Driver.dll</code> embeds about 230 XML "ROM" templates c=
+overing Logitech remotes from the Harmony 510 to the Ultimate One. Each tem=
+plate defines <code>commandbuilder</code> steps: the packets to send, how m=
+any responses to expect, values to check, and values to store (for example =
+<code>int:BE::file.size</code>). Placeholders like <code>%%remote.request.p=
+acket.length%%</code> are filled in at runtime. The same engine also unders=
+tands an older plain-HID protocol.</p>
+    </section>
+
+    <section id=3D"sync">
+      <h2>Sync flow</h2>
+      <p class=3D"sub">What happens when you press Sync.</p>
+      <div class=3D"diagram">
+<pre class=3D"mermaid" data-processed=3D"true"><svg id=3D"mermaid-179448150=
+6392" width=3D"100%" xmlns=3D"http://www.w3.org/2000/svg" xmlns:xlink=3D"ht=
+tp://www.w3.org/1999/xlink" style=3D"max-width: 1439px;" viewBox=3D"-50 -10=
+ 1439 903" role=3D"graphics-document document" aria-roledescription=3D"sequ=
+ence"><g><rect x=3D"1189" y=3D"817" fill=3D"#eaeaea" stroke=3D"#666" width=
+=3D"150" height=3D"65" name=3D"R" rx=3D"3" ry=3D"3" class=3D"actor actor-bo=
+ttom"></rect><text x=3D"1264" y=3D"849.5" dominant-baseline=3D"central" ali=
+gnment-baseline=3D"central" class=3D"actor" style=3D"text-anchor: middle; f=
+ont-size: 16px; font-weight: 400;"><tspan x=3D"1264" dy=3D"0">Harmony 600</=
+tspan></text></g><g><rect x=3D"854" y=3D"817" fill=3D"#eaeaea" stroke=3D"#6=
+66" width=3D"150" height=3D"65" name=3D"P" rx=3D"3" ry=3D"3" class=3D"actor=
+ actor-bottom"></rect><text x=3D"929" y=3D"849.5" dominant-baseline=3D"cent=
+ral" alignment-baseline=3D"central" class=3D"actor" style=3D"text-anchor: m=
+iddle; font-size: 16px; font-weight: 400;"><tspan x=3D"929" dy=3D"0">USB pl=
+ugin</tspan></text></g><g><rect x=3D"654" y=3D"817" fill=3D"#eaeaea" stroke=
+=3D"#666" width=3D"150" height=3D"65" name=3D"API" rx=3D"3" ry=3D"3" class=
+=3D"actor actor-bottom"></rect><text x=3D"729" y=3D"849.5" dominant-baselin=
+e=3D"central" alignment-baseline=3D"central" class=3D"actor" style=3D"text-=
+anchor: middle; font-size: 16px; font-weight: 400;"><tspan x=3D"729" dy=3D"=
+0">Logitech cloud</tspan></text></g><g><rect x=3D"284" y=3D"817" fill=3D"#e=
+aeaea" stroke=3D"#666" width=3D"150" height=3D"65" name=3D"SL" rx=3D"3" ry=
+=3D"3" class=3D"actor actor-bottom"></rect><text x=3D"359" y=3D"849.5" domi=
+nant-baseline=3D"central" alignment-baseline=3D"central" class=3D"actor" st=
+yle=3D"text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x=3D=
+"359" dy=3D"0">Silverlight app</tspan></text></g><g><rect x=3D"0" y=3D"817"=
+ fill=3D"#eaeaea" stroke=3D"#666" width=3D"150" height=3D"65" name=3D"U" rx=
+=3D"3" ry=3D"3" class=3D"actor actor-bottom"></rect><text x=3D"75" y=3D"849=
+.5" dominant-baseline=3D"central" alignment-baseline=3D"central" class=3D"a=
+ctor" style=3D"text-anchor: middle; font-size: 16px; font-weight: 400;"><ts=
+pan x=3D"75" dy=3D"0">You</tspan></text></g><g><line id=3D"actor4" x1=3D"12=
+64" y1=3D"5" x2=3D"1264" y2=3D"817" class=3D"200" stroke-width=3D"0.5px" st=
+roke=3D"#999"></line><g id=3D"root-4"><rect x=3D"1189" y=3D"0" fill=3D"#eae=
+aea" stroke=3D"#666" width=3D"150" height=3D"65" name=3D"R" rx=3D"3" ry=3D"=
+3" class=3D"actor actor-top"></rect><text x=3D"1264" y=3D"32.5" dominant-ba=
+seline=3D"central" alignment-baseline=3D"central" class=3D"actor" style=3D"=
+text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x=3D"1264" =
+dy=3D"0">Harmony 600</tspan></text></g></g><g><line id=3D"actor3" x1=3D"929=
+" y1=3D"5" x2=3D"929" y2=3D"817" class=3D"200" stroke-width=3D"0.5px" strok=
+e=3D"#999"></line><g id=3D"root-3"><rect x=3D"854" y=3D"0" fill=3D"#eaeaea"=
+ stroke=3D"#666" width=3D"150" height=3D"65" name=3D"P" rx=3D"3" ry=3D"3" c=
+lass=3D"actor actor-top"></rect><text x=3D"929" y=3D"32.5" dominant-baselin=
+e=3D"central" alignment-baseline=3D"central" class=3D"actor" style=3D"text-=
+anchor: middle; font-size: 16px; font-weight: 400;"><tspan x=3D"929" dy=3D"=
+0">USB plugin</tspan></text></g></g><g><line id=3D"actor2" x1=3D"729" y1=3D=
+"5" x2=3D"729" y2=3D"817" class=3D"200" stroke-width=3D"0.5px" stroke=3D"#9=
+99"></line><g id=3D"root-2"><rect x=3D"654" y=3D"0" fill=3D"#eaeaea" stroke=
+=3D"#666" width=3D"150" height=3D"65" name=3D"API" rx=3D"3" ry=3D"3" class=
+=3D"actor actor-top"></rect><text x=3D"729" y=3D"32.5" dominant-baseline=3D=
+"central" alignment-baseline=3D"central" class=3D"actor" style=3D"text-anch=
+or: middle; font-size: 16px; font-weight: 400;"><tspan x=3D"729" dy=3D"0">L=
+ogitech cloud</tspan></text></g></g><g><line id=3D"actor1" x1=3D"359" y1=3D=
+"5" x2=3D"359" y2=3D"817" class=3D"200" stroke-width=3D"0.5px" stroke=3D"#9=
+99"></line><g id=3D"root-1"><rect x=3D"284" y=3D"0" fill=3D"#eaeaea" stroke=
+=3D"#666" width=3D"150" height=3D"65" name=3D"SL" rx=3D"3" ry=3D"3" class=
+=3D"actor actor-top"></rect><text x=3D"359" y=3D"32.5" dominant-baseline=3D=
+"central" alignment-baseline=3D"central" class=3D"actor" style=3D"text-anch=
+or: middle; font-size: 16px; font-weight: 400;"><tspan x=3D"359" dy=3D"0">S=
+ilverlight app</tspan></text></g></g><g><line id=3D"actor0" x1=3D"75" y1=3D=
+"5" x2=3D"75" y2=3D"817" class=3D"200" stroke-width=3D"0.5px" stroke=3D"#99=
+9"></line><g id=3D"root-0"><rect x=3D"0" y=3D"0" fill=3D"#eaeaea" stroke=3D=
+"#666" width=3D"150" height=3D"65" name=3D"U" rx=3D"3" ry=3D"3" class=3D"ac=
+tor actor-top"></rect><text x=3D"75" y=3D"32.5" dominant-baseline=3D"centra=
+l" alignment-baseline=3D"central" class=3D"actor" style=3D"text-anchor: mid=
+dle; font-size: 16px; font-weight: 400;"><tspan x=3D"75" dy=3D"0">You</tspa=
+n></text></g></g><style>#mermaid-1794481506392{font-family:"trebuchet ms",v=
+erdana,arial,sans-serif;font-size:16px;fill:#000000;}#mermaid-1794481506392=
+ .error-icon{fill:#552222;}#mermaid-1794481506392 .error-text{fill:#552222;=
+stroke:#552222;}#mermaid-1794481506392 .edge-thickness-normal{stroke-width:=
+2px;}#mermaid-1794481506392 .edge-thickness-thick{stroke-width:3.5px;}#merm=
+aid-1794481506392 .edge-pattern-solid{stroke-dasharray:0;}#mermaid-17944815=
+06392 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-1794481506392 .edge=
+-pattern-dotted{stroke-dasharray:2;}#mermaid-1794481506392 .marker{fill:#66=
+6;stroke:#666;}#mermaid-1794481506392 .marker.cross{stroke:#666;}#mermaid-1=
+794481506392 svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-s=
+ize:16px;}#mermaid-1794481506392 .actor{stroke:hsl(0, 0%, 83%);fill:#eee;}#=
+mermaid-1794481506392 text.actor&gt;tspan{fill:#333;stroke:none;}#mermaid-1=
+794481506392 .actor-line{stroke:#666;}#mermaid-1794481506392 .messageLine0{=
+stroke-width:1.5;stroke-dasharray:none;stroke:#333;}#mermaid-1794481506392 =
+.messageLine1{stroke-width:1.5;stroke-dasharray:2,2;stroke:#333;}#mermaid-1=
+794481506392 #arrowhead path{fill:#333;stroke:#333;}#mermaid-1794481506392 =
+.sequenceNumber{fill:white;}#mermaid-1794481506392 #sequencenumber{fill:#33=
+3;}#mermaid-1794481506392 #crosshead path{fill:#333;stroke:#333;}#mermaid-1=
+794481506392 .messageText{fill:#333;stroke:none;}#mermaid-1794481506392 .la=
+belBox{stroke:hsl(0, 0%, 83%);fill:#eee;}#mermaid-1794481506392 .labelText,=
+#mermaid-1794481506392 .labelText&gt;tspan{fill:#333;stroke:none;}#mermaid-=
+1794481506392 .loopText,#mermaid-1794481506392 .loopText&gt;tspan{fill:#333=
+;stroke:none;}#mermaid-1794481506392 .loopLine{stroke-width:2px;stroke-dash=
+array:2,2;stroke:hsl(0, 0%, 83%);fill:hsl(0, 0%, 83%);}#mermaid-17944815063=
+92 .note{stroke:#999;fill:#666;}#mermaid-1794481506392 .noteText,#mermaid-1=
+794481506392 .noteText&gt;tspan{fill:#fff;stroke:none;}#mermaid-17944815063=
+92 .activation0{fill:#f4f4f4;stroke:#666;}#mermaid-1794481506392 .activatio=
+n1{fill:#f4f4f4;stroke:#666;}#mermaid-1794481506392 .activation2{fill:#f4f4=
+f4;stroke:#666;}#mermaid-1794481506392 .actorPopupMenu{position:absolute;}#=
+mermaid-1794481506392 .actorPopupMenuPanel{position:absolute;fill:#eee;box-=
+shadow:0px 8px 16px 0px rgba(0,0,0,0.2);filter:drop-shadow(3px 5px 2px rgb(=
+0 0 0 / 0.4));}#mermaid-1794481506392 .actor-man line{stroke:hsl(0, 0%, 83%=
+);fill:#eee;}#mermaid-1794481506392 .actor-man circle,#mermaid-179448150639=
+2 line{stroke:hsl(0, 0%, 83%);fill:#eee;stroke-width:2px;}#mermaid-17944815=
+06392 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}=
+</style><g></g><defs><symbol id=3D"computer" width=3D"24" height=3D"24"><pa=
+th transform=3D"scale(.5)" d=3D"M2 2v13h20v-13h-20zm18 11h-16v-9h16v9zm-10.=
+228 6l.466-1h3.524l.467 1h-4.457zm14.228 3h-24l2-6h2.104l-1.33 4h18.45l-1.2=
+97-4h2.073l2 6zm-5-10h-14v-7h14v7z"></path></symbol></defs><defs><symbol id=
+=3D"database" fill-rule=3D"evenodd" clip-rule=3D"evenodd"><path transform=
+=3D"scale(.5)" d=3D"M12.258.001l.256.004.255.005.253.008.251.01.249.012.247=
+.015.246.016.242.019.241.02.239.023.236.024.233.027.231.028.229.031.225.032=
+.223.034.22.036.217.038.214.04.211.041.208.043.205.045.201.046.198.048.194.=
+05.191.051.187.053.183.054.18.056.175.057.172.059.168.06.163.061.16.063.155=
+.064.15.066.074.033.073.033.071.034.07.034.069.035.068.035.067.035.066.035.=
+064.036.064.036.062.036.06.036.06.037.058.037.058.037.055.038.055.038.053.0=
+38.052.038.051.039.05.039.048.039.047.039.045.04.044.04.043.04.041.04.04.04=
+1.039.041.037.041.036.041.034.041.033.042.032.042.03.042.029.042.027.042.02=
+6.043.024.043.023.043.021.043.02.043.018.044.017.043.015.044.013.044.012.04=
+4.011.045.009.044.007.045.006.045.004.045.002.045.001.045v17l-.001.045-.002=
+.045-.004.045-.006.045-.007.045-.009.044-.011.045-.012.044-.013.044-.015.04=
+4-.017.043-.018.044-.02.043-.021.043-.023.043-.024.043-.026.043-.027.042-.0=
+29.042-.03.042-.032.042-.033.042-.034.041-.036.041-.037.041-.039.041-.04.04=
+1-.041.04-.043.04-.044.04-.045.04-.047.039-.048.039-.05.039-.051.039-.052.0=
+38-.053.038-.055.038-.055.038-.058.037-.058.037-.06.037-.06.036-.062.036-.0=
+64.036-.064.036-.066.035-.067.035-.068.035-.069.035-.07.034-.071.034-.073.0=
+33-.074.033-.15.066-.155.064-.16.063-.163.061-.168.06-.172.059-.175.057-.18=
+.056-.183.054-.187.053-.191.051-.194.05-.198.048-.201.046-.205.045-.208.043=
+-.211.041-.214.04-.217.038-.22.036-.223.034-.225.032-.229.031-.231.028-.233=
+.027-.236.024-.239.023-.241.02-.242.019-.246.016-.247.015-.249.012-.251.01-=
+.253.008-.255.005-.256.004-.258.001-.258-.001-.256-.004-.255-.005-.253-.008=
+-.251-.01-.249-.012-.247-.015-.245-.016-.243-.019-.241-.02-.238-.023-.236-.=
+024-.234-.027-.231-.028-.228-.031-.226-.032-.223-.034-.22-.036-.217-.038-.2=
+14-.04-.211-.041-.208-.043-.204-.045-.201-.046-.198-.048-.195-.05-.19-.051-=
+.187-.053-.184-.054-.179-.056-.176-.057-.172-.059-.167-.06-.164-.061-.159-.=
+063-.155-.064-.151-.066-.074-.033-.072-.033-.072-.034-.07-.034-.069-.035-.0=
+68-.035-.067-.035-.066-.035-.064-.036-.063-.036-.062-.036-.061-.036-.06-.03=
+7-.058-.037-.057-.037-.056-.038-.055-.038-.053-.038-.052-.038-.051-.039-.04=
+9-.039-.049-.039-.046-.039-.046-.04-.044-.04-.043-.04-.041-.04-.04-.041-.03=
+9-.041-.037-.041-.036-.041-.034-.041-.033-.042-.032-.042-.03-.042-.029-.042=
+-.027-.042-.026-.043-.024-.043-.023-.043-.021-.043-.02-.043-.018-.044-.017-=
+.043-.015-.044-.013-.044-.012-.044-.011-.045-.009-.044-.007-.045-.006-.045-=
+.004-.045-.002-.045-.001-.045v-17l.001-.045.002-.045.004-.045.006-.045.007-=
+.045.009-.044.011-.045.012-.044.013-.044.015-.044.017-.043.018-.044.02-.043=
+.021-.043.023-.043.024-.043.026-.043.027-.042.029-.042.03-.042.032-.042.033=
+-.042.034-.041.036-.041.037-.041.039-.041.04-.041.041-.04.043-.04.044-.04.0=
+46-.04.046-.039.049-.039.049-.039.051-.039.052-.038.053-.038.055-.038.056-.=
+038.057-.037.058-.037.06-.037.061-.036.062-.036.063-.036.064-.036.066-.035.=
+067-.035.068-.035.069-.035.07-.034.072-.034.072-.033.074-.033.151-.066.155-=
+.064.159-.063.164-.061.167-.06.172-.059.176-.057.179-.056.184-.054.187-.053=
+.19-.051.195-.05.198-.048.201-.046.204-.045.208-.043.211-.041.214-.04.217-.=
+038.22-.036.223-.034.226-.032.228-.031.231-.028.234-.027.236-.024.238-.023.=
+241-.02.243-.019.245-.016.247-.015.249-.012.251-.01.253-.008.255-.005.256-.=
+004.258-.001.258.001zm-9.258 20.499v.01l.001.021.003.021.004.022.005.021.00=
+6.022.007.022.009.023.01.022.011.023.012.023.013.023.015.023.016.024.017.02=
+3.018.024.019.024.021.024.022.025.023.024.024.025.052.049.056.05.061.051.06=
+6.051.07.051.075.051.079.052.084.052.088.052.092.052.097.052.102.051.105.05=
+2.11.052.114.051.119.051.123.051.127.05.131.05.135.05.139.048.144.049.147.0=
+47.152.047.155.047.16.045.163.045.167.043.171.043.176.041.178.041.183.039.1=
+87.039.19.037.194.035.197.035.202.033.204.031.209.03.212.029.216.027.219.02=
+5.222.024.226.021.23.02.233.018.236.016.24.015.243.012.246.01.249.008.253.0=
+05.256.004.259.001.26-.001.257-.004.254-.005.25-.008.247-.011.244-.012.241-=
+.014.237-.016.233-.018.231-.021.226-.021.224-.024.22-.026.216-.027.212-.028=
+.21-.031.205-.031.202-.034.198-.034.194-.036.191-.037.187-.039.183-.04.179-=
+.04.175-.042.172-.043.168-.044.163-.045.16-.046.155-.046.152-.047.148-.048.=
+143-.049.139-.049.136-.05.131-.05.126-.05.123-.051.118-.052.114-.051.11-.05=
+2.106-.052.101-.052.096-.052.092-.052.088-.053.083-.051.079-.052.074-.052.0=
+7-.051.065-.051.06-.051.056-.05.051-.05.023-.024.023-.025.021-.024.02-.024.=
+019-.024.018-.024.017-.024.015-.023.014-.024.013-.023.012-.023.01-.023.01-.=
+022.008-.022.006-.022.006-.022.004-.022.004-.021.001-.021.001-.021v-4.127l-=
+.077.055-.08.053-.083.054-.085.053-.087.052-.09.052-.093.051-.095.05-.097.0=
+5-.1.049-.102.049-.105.048-.106.047-.109.047-.111.046-.114.045-.115.045-.11=
+8.044-.12.043-.122.042-.124.042-.126.041-.128.04-.13.04-.132.038-.134.038-.=
+135.037-.138.037-.139.035-.142.035-.143.034-.144.033-.147.032-.148.031-.15.=
+03-.151.03-.153.029-.154.027-.156.027-.158.026-.159.025-.161.024-.162.023-.=
+163.022-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.=
+014-.175.013-.175.012-.177.011-.178.01-.179.008-.179.008-.181.006-.182.005-=
+.182.004-.184.003-.184.002h-.37l-.184-.002-.184-.003-.182-.004-.182-.005-.1=
+81-.006-.179-.008-.179-.008-.178-.01-.176-.011-.176-.012-.175-.013-.173-.01=
+4-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-=
+.022-.162-.023-.161-.024-.159-.025-.157-.026-.156-.027-.155-.027-.153-.029-=
+.151-.03-.15-.03-.148-.031-.146-.032-.145-.033-.143-.034-.141-.035-.14-.035=
+-.137-.037-.136-.037-.134-.038-.132-.038-.13-.04-.128-.04-.126-.041-.124-.0=
+42-.122-.042-.12-.044-.117-.043-.116-.045-.113-.045-.112-.046-.109-.047-.10=
+6-.047-.105-.048-.102-.049-.1-.049-.097-.05-.095-.05-.093-.052-.09-.051-.08=
+7-.052-.085-.053-.083-.054-.08-.054-.077-.054v4.127zm0-5.654v.011l.001.021.=
+003.021.004.021.005.022.006.022.007.022.009.022.01.022.011.023.012.023.013.=
+023.015.024.016.023.017.024.018.024.019.024.021.024.022.024.023.025.024.024=
+.052.05.056.05.061.05.066.051.07.051.075.052.079.051.084.052.088.052.092.05=
+2.097.052.102.052.105.052.11.051.114.051.119.052.123.05.127.051.131.05.135.=
+049.139.049.144.048.147.048.152.047.155.046.16.045.163.045.167.044.171.042.=
+176.042.178.04.183.04.187.038.19.037.194.036.197.034.202.033.204.032.209.03=
+.212.028.216.027.219.025.222.024.226.022.23.02.233.018.236.016.24.014.243.0=
+12.246.01.249.008.253.006.256.003.259.001.26-.001.257-.003.254-.006.25-.008=
+.247-.01.244-.012.241-.015.237-.016.233-.018.231-.02.226-.022.224-.024.22-.=
+025.216-.027.212-.029.21-.03.205-.032.202-.033.198-.035.194-.036.191-.037.1=
+87-.039.183-.039.179-.041.175-.042.172-.043.168-.044.163-.045.16-.045.155-.=
+047.152-.047.148-.048.143-.048.139-.05.136-.049.131-.05.126-.051.123-.051.1=
+18-.051.114-.052.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.=
+052.079-.052.074-.051.07-.052.065-.051.06-.05.056-.051.051-.049.023-.025.02=
+3-.024.021-.025.02-.024.019-.024.018-.024.017-.024.015-.023.014-.023.013-.0=
+24.012-.022.01-.023.01-.023.008-.022.006-.022.006-.022.004-.021.004-.022.00=
+1-.021.001-.021v-4.139l-.077.054-.08.054-.083.054-.085.052-.087.053-.09.051=
+-.093.051-.095.051-.097.05-.1.049-.102.049-.105.048-.106.047-.109.047-.111.=
+046-.114.045-.115.044-.118.044-.12.044-.122.042-.124.042-.126.041-.128.04-.=
+13.039-.132.039-.134.038-.135.037-.138.036-.139.036-.142.035-.143.033-.144.=
+033-.147.033-.148.031-.15.03-.151.03-.153.028-.154.028-.156.027-.158.026-.1=
+59.025-.161.024-.162.023-.163.022-.165.021-.166.02-.167.019-.169.018-.169.0=
+17-.171.016-.173.015-.173.014-.175.013-.175.012-.177.011-.178.009-.179.009-=
+.179.007-.181.007-.182.005-.182.004-.184.003-.184.002h-.37l-.184-.002-.184-=
+.003-.182-.004-.182-.005-.181-.007-.179-.007-.179-.009-.178-.009-.176-.011-=
+.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.=
+019-.166-.02-.165-.021-.163-.022-.162-.023-.161-.024-.159-.025-.157-.026-.1=
+56-.027-.155-.028-.153-.028-.151-.03-.15-.03-.148-.031-.146-.033-.145-.033-=
+.143-.033-.141-.035-.14-.036-.137-.036-.136-.037-.134-.038-.132-.039-.13-.0=
+39-.128-.04-.126-.041-.124-.042-.122-.043-.12-.043-.117-.044-.116-.044-.113=
+-.046-.112-.046-.109-.046-.106-.047-.105-.048-.102-.049-.1-.049-.097-.05-.0=
+95-.051-.093-.051-.09-.051-.087-.053-.085-.052-.083-.054-.08-.054-.077-.054=
+v4.139zm0-5.666v.011l.001.02.003.022.004.021.005.022.006.021.007.022.009.02=
+3.01.022.011.023.012.023.013.023.015.023.016.024.017.024.018.023.019.024.02=
+1.025.022.024.023.024.024.025.052.05.056.05.061.05.066.051.07.051.075.052.0=
+79.051.084.052.088.052.092.052.097.052.102.052.105.051.11.052.114.051.119.0=
+51.123.051.127.05.131.05.135.05.139.049.144.048.147.048.152.047.155.046.16.=
+045.163.045.167.043.171.043.176.042.178.04.183.04.187.038.19.037.194.036.19=
+7.034.202.033.204.032.209.03.212.028.216.027.219.025.222.024.226.021.23.02.=
+233.018.236.017.24.014.243.012.246.01.249.008.253.006.256.003.259.001.26-.0=
+01.257-.003.254-.006.25-.008.247-.01.244-.013.241-.014.237-.016.233-.018.23=
+1-.02.226-.022.224-.024.22-.025.216-.027.212-.029.21-.03.205-.032.202-.033.=
+198-.035.194-.036.191-.037.187-.039.183-.039.179-.041.175-.042.172-.043.168=
+-.044.163-.045.16-.045.155-.047.152-.047.148-.048.143-.049.139-.049.136-.04=
+9.131-.051.126-.05.123-.051.118-.052.114-.051.11-.052.106-.052.101-.052.096=
+-.052.092-.052.088-.052.083-.052.079-.052.074-.052.07-.051.065-.051.06-.051=
+.056-.05.051-.049.023-.025.023-.025.021-.024.02-.024.019-.024.018-.024.017-=
+.024.015-.023.014-.024.013-.023.012-.023.01-.022.01-.023.008-.022.006-.022.=
+006-.022.004-.022.004-.021.001-.021.001-.021v-4.153l-.077.054-.08.054-.083.=
+053-.085.053-.087.053-.09.051-.093.051-.095.051-.097.05-.1.049-.102.048-.10=
+5.048-.106.048-.109.046-.111.046-.114.046-.115.044-.118.044-.12.043-.122.04=
+3-.124.042-.126.041-.128.04-.13.039-.132.039-.134.038-.135.037-.138.036-.13=
+9.036-.142.034-.143.034-.144.033-.147.032-.148.032-.15.03-.151.03-.153.028-=
+.154.028-.156.027-.158.026-.159.024-.161.024-.162.023-.163.023-.165.021-.16=
+6.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.01=
+2-.177.01-.178.01-.179.009-.179.007-.181.006-.182.006-.182.004-.184.003-.18=
+4.001-.185.001-.185-.001-.184-.001-.184-.003-.182-.004-.182-.006-.181-.006-=
+.179-.007-.179-.009-.178-.01-.176-.01-.176-.012-.175-.013-.173-.014-.172-.0=
+15-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.023-.162=
+-.023-.161-.024-.159-.024-.157-.026-.156-.027-.155-.028-.153-.028-.151-.03-=
+.15-.03-.148-.032-.146-.032-.145-.033-.143-.034-.141-.034-.14-.036-.137-.03=
+6-.136-.037-.134-.038-.132-.039-.13-.039-.128-.041-.126-.041-.124-.041-.122=
+-.043-.12-.043-.117-.044-.116-.044-.113-.046-.112-.046-.109-.046-.106-.048-=
+.105-.048-.102-.048-.1-.05-.097-.049-.095-.051-.093-.051-.09-.052-.087-.052=
+-.085-.053-.083-.053-.08-.054-.077-.054v4.153zm8.74-8.179l-.257.004-.254.00=
+5-.25.008-.247.011-.244.012-.241.014-.237.016-.233.018-.231.021-.226.022-.2=
+24.023-.22.026-.216.027-.212.028-.21.031-.205.032-.202.033-.198.034-.194.03=
+6-.191.038-.187.038-.183.04-.179.041-.175.042-.172.043-.168.043-.163.045-.1=
+6.046-.155.046-.152.048-.148.048-.143.048-.139.049-.136.05-.131.05-.126.051=
+-.123.051-.118.051-.114.052-.11.052-.106.052-.101.052-.096.052-.092.052-.08=
+8.052-.083.052-.079.052-.074.051-.07.052-.065.051-.06.05-.056.05-.051.05-.0=
+23.025-.023.024-.021.024-.02.025-.019.024-.018.024-.017.023-.015.024-.014.0=
+23-.013.023-.012.023-.01.023-.01.022-.008.022-.006.023-.006.021-.004.022-.0=
+04.021-.001.021-.001.021.001.021.001.021.004.021.004.022.006.021.006.023.00=
+8.022.01.022.01.023.012.023.013.023.014.023.015.024.017.023.018.024.019.024=
+.02.025.021.024.023.024.023.025.051.05.056.05.06.05.065.051.07.052.074.051.=
+079.052.083.052.088.052.092.052.096.052.101.052.106.052.11.052.114.052.118.=
+051.123.051.126.051.131.05.136.05.139.049.143.048.148.048.152.048.155.046.1=
+6.046.163.045.168.043.172.043.175.042.179.041.183.04.187.038.191.038.194.03=
+6.198.034.202.033.205.032.21.031.212.028.216.027.22.026.224.023.226.022.231=
+.021.233.018.237.016.241.014.244.012.247.011.25.008.254.005.257.004.26.001.=
+26-.001.257-.004.254-.005.25-.008.247-.011.244-.012.241-.014.237-.016.233-.=
+018.231-.021.226-.022.224-.023.22-.026.216-.027.212-.028.21-.031.205-.032.2=
+02-.033.198-.034.194-.036.191-.038.187-.038.183-.04.179-.041.175-.042.172-.=
+043.168-.043.163-.045.16-.046.155-.046.152-.048.148-.048.143-.048.139-.049.=
+136-.05.131-.05.126-.051.123-.051.118-.051.114-.052.11-.052.106-.052.101-.0=
+52.096-.052.092-.052.088-.052.083-.052.079-.052.074-.051.07-.052.065-.051.0=
+6-.05.056-.05.051-.05.023-.025.023-.024.021-.024.02-.025.019-.024.018-.024.=
+017-.023.015-.024.014-.023.013-.023.012-.023.01-.023.01-.022.008-.022.006-.=
+023.006-.021.004-.022.004-.021.001-.021.001-.021-.001-.021-.001-.021-.004-.=
+021-.004-.022-.006-.021-.006-.023-.008-.022-.01-.022-.01-.023-.012-.023-.01=
+3-.023-.014-.023-.015-.024-.017-.023-.018-.024-.019-.024-.02-.025-.021-.024=
+-.023-.024-.023-.025-.051-.05-.056-.05-.06-.05-.065-.051-.07-.052-.074-.051=
+-.079-.052-.083-.052-.088-.052-.092-.052-.096-.052-.101-.052-.106-.052-.11-=
+.052-.114-.052-.118-.051-.123-.051-.126-.051-.131-.05-.136-.05-.139-.049-.1=
+43-.048-.148-.048-.152-.048-.155-.046-.16-.046-.163-.045-.168-.043-.172-.04=
+3-.175-.042-.179-.041-.183-.04-.187-.038-.191-.038-.194-.036-.198-.034-.202=
+-.033-.205-.032-.21-.031-.212-.028-.216-.027-.22-.026-.224-.023-.226-.022-.=
+231-.021-.233-.018-.237-.016-.241-.014-.244-.012-.247-.011-.25-.008-.254-.0=
+05-.257-.004-.26-.001-.26.001z"></path></symbol></defs><defs><symbol id=3D"=
+clock" width=3D"24" height=3D"24"><path transform=3D"scale(.5)" d=3D"M12 2c=
+5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-=
+6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.848 =
+12.459c.202.038.202.333.001.372-1.907.361-6.045 1.111-6.547 1.111-.719 0-1.=
+301-.582-1.301-1.301 0-.512.77-5.447 1.125-7.445.034-.192.312-.181.343.014l=
+.985 6.238 5.394 1.011z"></path></symbol></defs><defs><marker id=3D"arrowhe=
+ad" refX=3D"7.9" refY=3D"5" markerUnits=3D"userSpaceOnUse" markerWidth=3D"1=
+2" markerHeight=3D"12" orient=3D"auto"><path d=3D"M 0 0 L 10 5 L 0 10 z"></=
+path></marker></defs><defs><marker id=3D"crosshead" markerWidth=3D"15" mark=
+erHeight=3D"8" orient=3D"auto" refX=3D"4" refY=3D"4.5"><path fill=3D"none" =
+stroke=3D"#000000" stroke-width=3D"1pt" d=3D"M 1,2 L 6,7 M 6,2 L 1,7" style=
+=3D"stroke-dasharray: 0, 0;"></path></marker></defs><defs><marker id=3D"fil=
+led-head" refX=3D"15.5" refY=3D"7" markerWidth=3D"20" markerHeight=3D"28" o=
+rient=3D"auto"><path d=3D"M 18,7 L9,13 L14,7 L9,1 Z"></path></marker></defs=
+><defs><marker id=3D"sequencenumber" refX=3D"15" refY=3D"15" markerWidth=3D=
+"60" markerHeight=3D"40" orient=3D"auto"><circle cx=3D"15" cy=3D"15" r=3D"6=
+"></circle></marker></defs><g><line x1=3D"348" y1=3D"439" x2=3D"1275" y2=3D=
+"439" class=3D"loopLine"></line><line x1=3D"1275" y1=3D"439" x2=3D"1275" y2=
+=3D"693" class=3D"loopLine"></line><line x1=3D"348" y1=3D"693" x2=3D"1275" =
+y2=3D"693" class=3D"loopLine"></line><line x1=3D"348" y1=3D"439" x2=3D"348"=
+ y2=3D"693" class=3D"loopLine"></line><polygon points=3D"348,439 398,439 39=
+8,452 389.6,459 348,459" class=3D"labelBox"></polygon><text x=3D"373" y=3D"=
+452" text-anchor=3D"middle" dominant-baseline=3D"middle" alignment-baseline=
+=3D"middle" class=3D"labelText" style=3D"font-size: 16px; font-weight: 400;=
+">loop</text><text x=3D"836.5" y=3D"457" text-anchor=3D"middle" class=3D"lo=
+opText" style=3D"font-size: 16px; font-weight: 400;"><tspan x=3D"836.5">[Ea=
+ch template step]</tspan></text></g><text x=3D"216" y=3D"80" text-anchor=3D=
+"middle" dominant-baseline=3D"middle" alignment-baseline=3D"middle" class=
+=3D"messageText" dy=3D"1em" style=3D"font-size: 16px; font-weight: 400;">Ed=
+it devices, activities, buttons</text><line x1=3D"76" y1=3D"117" x2=3D"355"=
+ y2=3D"117" class=3D"messageLine0" stroke-width=3D"2" stroke=3D"none" marke=
+r-end=3D"url(#arrowhead)" style=3D"fill: none;"></line><text x=3D"543" y=3D=
+"132" text-anchor=3D"middle" dominant-baseline=3D"middle" alignment-baselin=
+e=3D"middle" class=3D"messageText" dy=3D"1em" style=3D"font-size: 16px; fon=
+t-weight: 400;">Save calls (devices, activities, button maps)</text><line x=
+1=3D"360" y1=3D"169" x2=3D"725" y2=3D"169" class=3D"messageLine0" stroke-wi=
+dth=3D"2" stroke=3D"none" marker-end=3D"url(#arrowhead)" style=3D"fill: non=
+e;"></line><text x=3D"216" y=3D"184" text-anchor=3D"middle" dominant-baseli=
+ne=3D"middle" alignment-baseline=3D"middle" class=3D"messageText" dy=3D"1em=
+" style=3D"font-size: 16px; font-weight: 400;">Press Sync</text><line x1=3D=
+"76" y1=3D"221" x2=3D"355" y2=3D"221" class=3D"messageLine0" stroke-width=
+=3D"2" stroke=3D"none" marker-end=3D"url(#arrowhead)" style=3D"fill: none;"=
+></line><text x=3D"543" y=3D"236" text-anchor=3D"middle" dominant-baseline=
+=3D"middle" alignment-baseline=3D"middle" class=3D"messageText" dy=3D"1em" =
+style=3D"font-size: 16px; font-weight: 400;">ICompileManager.StartCompile</=
+text><line x1=3D"360" y1=3D"273" x2=3D"725" y2=3D"273" class=3D"messageLine=
+0" stroke-width=3D"2" stroke=3D"none" marker-end=3D"url(#arrowhead)" style=
+=3D"fill: none;"></line><text x=3D"546" y=3D"288" text-anchor=3D"middle" do=
+minant-baseline=3D"middle" alignment-baseline=3D"middle" class=3D"messageTe=
+xt" dy=3D"1em" style=3D"font-size: 16px; font-weight: 400;">Compiled config=
+uration</text><line x1=3D"728" y1=3D"325" x2=3D"363" y2=3D"325" class=3D"me=
+ssageLine1" stroke-width=3D"2" stroke=3D"none" marker-end=3D"url(#arrowhead=
+)" style=3D"stroke-dasharray: 3, 3; fill: none;"></line><text x=3D"543" y=
+=3D"340" text-anchor=3D"middle" dominant-baseline=3D"middle" alignment-base=
+line=3D"middle" class=3D"messageText" dy=3D"1em" style=3D"font-size: 16px; =
+font-weight: 400;">IRomDataLibrary.RequestOperationData</text><line x1=3D"3=
+60" y1=3D"377" x2=3D"725" y2=3D"377" class=3D"messageLine0" stroke-width=3D=
+"2" stroke=3D"none" marker-end=3D"url(#arrowhead)" style=3D"fill: none;"></=
+line><text x=3D"546" y=3D"392" text-anchor=3D"middle" dominant-baseline=3D"=
+middle" alignment-baseline=3D"middle" class=3D"messageText" dy=3D"1em" styl=
+e=3D"font-size: 16px; font-weight: 400;">Operation script and payload</text=
+><line x1=3D"728" y1=3D"429" x2=3D"363" y2=3D"429" class=3D"messageLine1" s=
+troke-width=3D"2" stroke=3D"none" marker-end=3D"url(#arrowhead)" style=3D"s=
+troke-dasharray: 3, 3; fill: none;"></line><text x=3D"643" y=3D"490" text-a=
+nchor=3D"middle" dominant-baseline=3D"middle" alignment-baseline=3D"middle"=
+ class=3D"messageText" dy=3D"1em" style=3D"font-size: 16px; font-weight: 40=
+0;">performOperation(deviceId, packets, n)</text><line x1=3D"360" y1=3D"527=
+" x2=3D"925" y2=3D"527" class=3D"messageLine0" stroke-width=3D"2" stroke=3D=
+"none" marker-end=3D"url(#arrowhead)" style=3D"fill: none;"></line><text x=
+=3D"1095" y=3D"542" text-anchor=3D"middle" dominant-baseline=3D"middle" ali=
+gnment-baseline=3D"middle" class=3D"messageText" dy=3D"1em" style=3D"font-s=
+ize: 16px; font-weight: 400;">HID report (Open, Write, Flush, Close)</text>=
+<line x1=3D"930" y1=3D"579" x2=3D"1260" y2=3D"579" class=3D"messageLine0" s=
+troke-width=3D"2" stroke=3D"none" marker-end=3D"url(#arrowhead)" style=3D"f=
+ill: none;"></line><text x=3D"1098" y=3D"594" text-anchor=3D"middle" domina=
+nt-baseline=3D"middle" alignment-baseline=3D"middle" class=3D"messageText" =
+dy=3D"1em" style=3D"font-size: 16px; font-weight: 400;">Response</text><lin=
+e x1=3D"1263" y1=3D"631" x2=3D"933" y2=3D"631" class=3D"messageLine1" strok=
+e-width=3D"2" stroke=3D"none" marker-end=3D"url(#arrowhead)" style=3D"strok=
+e-dasharray: 3, 3; fill: none;"></line><text x=3D"646" y=3D"646" text-ancho=
+r=3D"middle" dominant-baseline=3D"middle" alignment-baseline=3D"middle" cla=
+ss=3D"messageText" dy=3D"1em" style=3D"font-size: 16px; font-weight: 400;">=
+Response bytes</text><line x1=3D"928" y1=3D"683" x2=3D"363" y2=3D"683" clas=
+s=3D"messageLine1" stroke-width=3D"2" stroke=3D"none" marker-end=3D"url(#ar=
+rowhead)" style=3D"stroke-dasharray: 3, 3; fill: none;"></line><text x=3D"8=
+10" y=3D"708" text-anchor=3D"middle" dominant-baseline=3D"middle" alignment=
+-baseline=3D"middle" class=3D"messageText" dy=3D"1em" style=3D"font-size: 1=
+6px; font-weight: 400;">Reset</text><line x1=3D"360" y1=3D"745" x2=3D"1260"=
+ y2=3D"745" class=3D"messageLine0" stroke-width=3D"2" stroke=3D"none" marke=
+r-end=3D"url(#arrowhead)" style=3D"fill: none;"></line><text x=3D"543" y=3D=
+"760" text-anchor=3D"middle" dominant-baseline=3D"middle" alignment-baselin=
+e=3D"middle" class=3D"messageText" dy=3D"1em" style=3D"font-size: 16px; fon=
+t-weight: 400;">IRemoteManager.RegisterSuccessfulSync</text><line x1=3D"360=
+" y1=3D"797" x2=3D"725" y2=3D"797" class=3D"messageLine0" stroke-width=3D"2=
+" stroke=3D"none" marker-end=3D"url(#arrowhead)" style=3D"fill: none;"></li=
+ne></svg></pre>
+      </div>
+      <p class=3D"caption">The order and the device-side commands match the=
+ templates. Exactly which call returns the config binary is <span class=3D"=
+chip inf">Inferred</span> and should be confirmed by watching a sync.</p>
+      <h3>Learning IR</h3>
+      <p>The reverse path: put the remote in learning mode, open <code>/ir/=
+ir_cap</code>, read the captured signal, send it to <code>IInfraredAnalysis=
+Manager.AnalyzeInfrared</code>, then save the result as a device command. <=
+span class=3D"chip inf">Inferred</span> for the cloud step.</p>
+    </section>
+
+    <section id=3D"risks">
+      <h2>Risks</h2>
+      <div class=3D"callout risk">
+        <p><span class=3D"chip risk">Cloud dependency</span></p>
+        <p>The app has no offline mode. If <code>setup.myharmony.com</code>=
+ or <code>files.myharmony.com</code> goes away, the remote can no longer be=
+ reconfigured with this software.</p>
+      </div>
+      <div class=3D"callout risk">
+        <p><span class=3D"chip risk">Old runtime</span></p>
+        <p>Chrome 29 from 2013 runs with the sandbox off and loads remote c=
+ode, alongside Silverlight 5, which Microsoft no longer supports. Run the a=
+pp only while you need it.</p>
+      </div>
+      <div class=3D"callout risk">
+        <p><span class=3D"chip risk">Open debug port</span></p>
+        <p>The DevTools port <code>127.0.0.1:8088</code> needs no password.=
+ Any program on the PC could control the signed-in session while the app is=
+ open.</p>
+      </div>
+      <p class=3D"caption">The <code>$ is not defined</code> lines in <code=
+>console.log</code> are harmless. <code>InstallSoftware.js</code> loads bef=
+ore jQuery.</p>
+    </section>
+
+    <section id=3D"evidence">
+      <h2>Evidence</h2>
+      <p class=3D"sub">Where each finding came from. The extracted copies a=
+re in a temporary session folder and should be moved into the repo before i=
+t is cleaned up.</p>
+      <div class=3D"tbl"><table>
+        <thead><tr><th>Source</th><th>Location</th><th>What it showed</th><=
+/tr></thead>
+        <tbody>
+          <tr><td>Install folder</td><td><code>C:\Program Files (x86)\Logit=
+ech\MyHarmony</code></td><td>Launcher, CEF shell, plugins, bundled Silverli=
+ght</td></tr>
+          <tr><td>HTTP cache</td><td><code>AppFiles\temp\data\f_*</code></t=
+d><td>Host page HTML and 9 unique XAP packages</td></tr>
+          <tr><td>Extracted XAPs</td><td>session folder <code>x\</code></td=
+><td>Assemblies and service contracts</td></tr>
+          <tr><td>Device table</td><td>session folder <code>rom\r334.xml</c=
+ode></td><td>VID/PID =E2=86=92 model =E2=86=92 templates</td></tr>
+          <tr><td>ROM templates</td><td>session folder <code>rom\r*.xml</co=
+de></td><td>Protocol steps per remote family</td></tr>
+          <tr><td>Page scripts</td><td>session folder <code>js\</code></td>=
+<td>Plugin init and Hub WebSocket client</td></tr>
+          <tr><td>Helper scripts</td><td>session folder <code>tools\</code>=
+</td><td><code>xap.py</code>, <code>ext.py</code>, <code>str.py</code>, <co=
+de>cdp.mjs</code></td></tr>
+          <tr><td>Live system</td><td>process list, TCP table, PnP devices<=
+/td><td>Process tree, endpoints, remote on USB</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id=3D"next">
+      <h2>Open threads</h2>
+      <p class=3D"sub">Where to pick up next time, roughly in order.</p>
+      <ol class=3D"threads">
+        <li><b>Move the extracted material into the repo</b><span>Copy the =
+XAPs, templates, scripts and tools out of the temporary session folder.</sp=
+an></li>
+        <li><b>Restart MyHarmony to free the DevTools slot</b><span>The fir=
+st probe left Chrome 29's single debugger slot taken. After a restart, conn=
+ect once with the raw client in <code>cdp.mjs</code>.</span></li>
+        <li><b>Record a real sync</b><span>Capture network and console traf=
+fic during one sync to confirm which call returns the config binary and fil=
+l in the inferred steps.</span></li>
+        <li><b>Decompile the driver</b><span>Open <code>Web.Driver.dll</cod=
+e> and <code>RemoteSync.dll</code> in ILSpy to confirm how templates are ch=
+osen and how <code>performOperation</code> results are parsed.</span></li>
+        <li><b>Identify the exact model</b><span>Run only the read steps of=
+ <code>identifyremote</code> to learn whether the 600 reports model 66 or 9=
+6, plus its skin and firmware.</span></li>
+        <li><b>Offline backup</b><span>The templates include a read path fo=
+r the user configuration. A read-only backup tool would protect the setup i=
+f Logitech's servers shut down.</span></li>
+      </ol>
+    </section>
+
+    <footer>Prepared with Claude from a read-only analysis of the running a=
+pp. Nothing was written to the remote.</footer>
+  </main>
+</div>
+
+<div class=3D"mermaidTooltip" style=3D"opacity: 0;"></div>
+
+
+</body></html>
+------MultipartBoundary--y7HeC3KsRd1KNgOTp9oTbZO6IigNpEaQ0zZkpbEKCN----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap
+
+@charset "utf-8";
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1iIq129k.woff2") format("woff2"); unicode-rang=
+e: U+460-52F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1isq129k.woff2") format("woff2"); unicode-rang=
+e: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1pUL8lJdhg.woff2") format("woff2"); unicode-ra=
+nge: U+2000-2001, U+2004-2008, U+200A, U+23B8-23BD, U+2500-259F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1iAq129k.woff2") format("woff2"); unicode-rang=
+e: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-=
+301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1iEq129k.woff2") format("woff2"); unicode-rang=
+e: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+3=
+29, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4=
+, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2") format("woff2"); unicode-range:=
+ U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+=
+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U=
++FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwl1FgtIU.woff2") format("woff2"); unicode-=
+range: U+460-52F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2=
+F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwlRFgtIU.woff2") format("woff2"); unicode-=
+range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwupkp-8tFQ.woff2") format("woff2"); unicod=
+e-range: U+2000-2001, U+2004-2008, U+200A, U+23B8-23BD, U+2500-259F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwl9FgtIU.woff2") format("woff2"); unicode-=
+range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+=
+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwl5FgtIU.woff2") format("woff2"); unicode-=
+range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308,=
+ U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-=
+20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v23/-F6qfjptAgt5VM-kVkqdyU8n3twJwlBFgg.woff2") format("woff2"); unicode-ra=
+nge: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308=
+, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEF=
+F, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA=
+.woff2") format("woff2"); unicode-range: U+460-52F, U+1C80-1C8A, U+20B4, U+=
+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA=
+.woff2") format("woff2"); unicode-range: U+301, U+400-45F, U+490-491, U+4B0=
+-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA=
+.woff2") format("woff2"); unicode-range: U+370-377, U+37A-37F, U+384-38A, U=
++38C, U+38E-3A1, U+3A3-3FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA=
+.woff2") format("woff2"); unicode-range: U+102-103, U+110-111, U+128-129, U=
++168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+3=
+29, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA=
+.woff2") format("woff2"); unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U=
++2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-=
+1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 400; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.wo=
+ff2") format("woff2"); unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, =
+U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+21=
+91, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA=
+.woff2") format("woff2"); unicode-range: U+460-52F, U+1C80-1C8A, U+20B4, U+=
+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA=
+.woff2") format("woff2"); unicode-range: U+301, U+400-45F, U+490-491, U+4B0=
+-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA=
+.woff2") format("woff2"); unicode-range: U+370-377, U+37A-37F, U+384-38A, U=
++38C, U+38E-3A1, U+3A3-3FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA=
+.woff2") format("woff2"); unicode-range: U+102-103, U+110-111, U+128-129, U=
++168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+3=
+29, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA=
+.woff2") format("woff2"); unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U=
++2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-=
+1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 500; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.wo=
+ff2") format("woff2"); unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, =
+U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+21=
+91, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbABA=
+.woff2") format("woff2"); unicode-range: U+460-52F, U+1C80-1C8A, U+20B4, U+=
+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbABA=
+.woff2") format("woff2"); unicode-range: U+301, U+400-45F, U+490-491, U+4B0=
+-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbABA=
+.woff2") format("woff2"); unicode-range: U+370-377, U+37A-37F, U+384-38A, U=
++38C, U+38E-3A1, U+3A3-3FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbABA=
+.woff2") format("woff2"); unicode-range: U+102-103, U+110-111, U+128-129, U=
++168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+3=
+29, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbABA=
+.woff2") format("woff2"); unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U=
++2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-=
+1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight:=
+ 600; font-stretch: 100%; font-display: swap; src: url("https://fonts.gstat=
+ic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYY.wo=
+ff2") format("woff2"); unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, =
+U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+21=
+91, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb54C-s0.woff2") format("woff2"); unicode-ran=
+ge: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300=
+-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2") format("woff2"); unicode-ran=
+ge: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+=
+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C=
+4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2") format("woff2"); unicode-range=
+: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U=
++329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, =
+U+FFFD; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb54C-s0.woff2") format("woff2"); unicode-ran=
+ge: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300=
+-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2") format("woff2"); unicode-ran=
+ge: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+=
+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C=
+4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/spacegrotes=
+k/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2") format("woff2"); unicode-range=
+: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U=
++329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, =
+U+FFFD; }
+------MultipartBoundary--y7HeC3KsRd1KNgOTp9oTbZO6IigNpEaQ0zZkpbEKCN----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-f5c9bfe8-fcd1-420d-8288-827c2cb368a9@mhtml.blink
+
+@charset "utf-8";
+
+:root { color-scheme: light; }
+
+body { margin: 0px; }
+------MultipartBoundary--y7HeC3KsRd1KNgOTp9oTbZO6IigNpEaQ0zZkpbEKCN----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-c0e0c575-2d58-4850-9856-3899f97b7abe@mhtml.blink
+
+@charset "utf-8";
+
+:root { --bg: #F3F6F7; --surface: #FFFFFF; --ink: #14232B; --muted: #56676F=
+; --line: #D3DCE0; --accent: #007A80; --accent-soft: #DDF0F0; --ir: #B8324A=
+; --ir-soft: #F7E3E7; --code-bg: #E8EEF0; --ok: #2F7D4A; --ok-soft: #E1F1E6=
+; --warn: #9A6200; --warn-soft: #F8EDD6; --f-display: "Space Grotesk", "Seg=
+oe UI", system-ui, sans-serif; --f-body: "IBM Plex Sans", "Segoe UI", syste=
+m-ui, sans-serif; --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monosp=
+ace; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme=3D"light"]) { --bg: #0D1519; --surface: #131F25; --=
+ink: #E2EBEE; --muted: #93A4AC; --line: #26363E; --accent: #3CC6CC; --accen=
+t-soft: #143238; --ir: #F2808F; --ir-soft: #3A1C23; --code-bg: #1A2A31; --o=
+k: #6CCB8B; --ok-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F; colo=
+r-scheme: dark; }
+}
+
+:root[data-theme=3D"dark"] { --bg: #0D1519; --surface: #131F25; --ink: #E2E=
+BEE; --muted: #93A4AC; --line: #26363E; --accent: #3CC6CC; --accent-soft: #=
+143238; --ir: #F2808F; --ir-soft: #3A1C23; --code-bg: #1A2A31; --ok: #6CCB8=
+B; --ok-soft: #173025; --warn: #E9B45A; --warn-soft: #33270F; color-scheme:=
+ dark; }
+
+* { box-sizing: border-box; }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-bod=
+y); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right:=
+ max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+
+.wrap { max-width: 1180px; margin: 0px auto; display: grid; grid-template-c=
+olumns: 200px minmax(0px, 1fr); gap: 48px; }
+
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px)=
+; align-self: start; display: grid; gap: 2px; font-size: 13px; }
+
+nav.toc .lbl { font: 600 11px/1 var(--f-body); letter-spacing: 0.08em; text=
+-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+nav.toc a { color: var(--muted); text-decoration: none; padding: 4px 8px; b=
+order-left: 2px solid var(--line); }
+
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent); border-lef=
+t-color: var(--accent); outline: none; }
+
+main { min-width: 0px; display: grid; gap: 56px; }
+
+header.hero { display: grid; gap: 14px; }
+
+.eyebrow { font: 500 12px/1 var(--f-mono); color: var(--accent); letter-spa=
+cing: 0.04em; }
+
+h1 { font: 600 clamp(30px, 4.4vw, 44px)/1.1 var(--f-display); margin: 0px; =
+text-wrap: balance; letter-spacing: -0.01em; }
+
+h2 { font: 600 24px/1.2 var(--f-display); margin: 0px 0px 6px; text-wrap: b=
+alance; }
+
+h3 { font: 600 16px/1.3 var(--f-body); margin: 20px 0px 8px; }
+
+p { margin: 0px 0px 12px; max-width: 68ch; }
+
+.lede { font-size: 17px; color: var(--muted); max-width: 64ch; }
+
+section { display: grid; gap: 14px; scroll-margin-top: 24px; }
+
+section > .sub { color: var(--muted); margin: 0px; }
+
+code, .mono { font-family: var(--f-mono); font-size: 0.9em; }
+
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; ov=
+erflow-wrap: anywhere; }
+
+a { color: var(--accent); }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200p=
+x, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line);=
+ border-radius: 8px; overflow: hidden; }
+
+.fact { background: var(--surface); padding: 14px 16px; display: grid; gap:=
+ 4px; align-content: start; }
+
+.fact .k { font: 600 11px/1.2 var(--f-body); letter-spacing: 0.07em; text-t=
+ransform: uppercase; color: var(--muted); }
+
+.fact .v { font: 500 15px/1.35 var(--f-mono); overflow-wrap: anywhere; }
+
+.fact .v.ir { color: var(--ir); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; c=
+olor: var(--muted); align-items: center; }
+
+.chip { display: inline-block; font: 600 10.5px/1 var(--f-body); letter-spa=
+cing: 0.06em; text-transform: uppercase; padding: 4px 7px; border-radius: 9=
+9px; white-space: nowrap; vertical-align: 2px; }
+
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+
+.chip.inf { background: var(--warn-soft); color: var(--warn); }
+
+.chip.risk { background: var(--ir-soft); color: var(--ir); }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px;=
+ background: var(--surface); }
+
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-b=
+ottom: 1px solid var(--line); }
+
+th { font: 600 11px/1.3 var(--f-body); letter-spacing: 0.06em; text-transfo=
+rm: uppercase; color: var(--muted); background: var(--bg); }
+
+tr:last-child td { border-bottom: 0px; }
+
+td.mono, td code { white-space: nowrap; }
+
+td.ops { font: 13px/1.5 var(--f-mono); color: var(--muted); min-width: 280p=
+x; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); borde=
+r-radius: 8px; padding: 16px; overflow-x: auto; }
+
+.diagram pre.mermaid { margin: 0px; background: none; display: flex; justif=
+y-content: center; min-width: 560px; }
+
+.caption { font-size: 13px; color: var(--muted); margin: 0px; }
+
+.packet { display: grid; gap: 10px; }
+
+.bytes { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; }
+
+.byte { flex: 0 0 auto; min-width: 92px; border: 1px solid var(--line); bor=
+der-radius: 6px; background: var(--surface); padding: 8px 10px; display: gr=
+id; gap: 2px; }
+
+.byte .off { font: 11px/1 var(--f-mono); color: var(--muted); }
+
+.byte .val { font: 600 16px/1.2 var(--f-mono); }
+
+.byte .nm { font-size: 12px; color: var(--muted); }
+
+.byte.hdr { border-color: var(--accent); }
+
+.byte.hdr .val { color: var(--accent); }
+
+.byte.prm { border-style: dashed; min-width: 180px; }
+
+.byte.prm .val { color: var(--ir); }
+
+.callout { border: 1px solid var(--line); background: var(--surface); borde=
+r-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; }
+
+.callout.risk { border-color: color-mix(in srgb, var(--ir) 45%, var(--line)=
+); }
+
+.callout p { margin: 0px; }
+
+ul.clean { margin: 0px; padding-left: 18px; display: grid; gap: 6px; max-wi=
+dth: 72ch; }
+
+ol.threads { margin: 0px; padding: 0px; list-style: none; display: grid; ga=
+p: 10px; counter-reset: t 0; }
+
+ol.threads li { counter-increment: t 1; background: var(--surface); border:=
+ 1px solid var(--line); border-radius: 8px; padding: 12px 16px 12px 52px; p=
+osition: relative; }
+
+ol.threads li::before { content: counter(t); position: absolute; left: 16px=
+; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: var=
+(--accent-soft); color: var(--accent); font: 600 12px/24px var(--f-mono); t=
+ext-align: center; }
+
+ol.threads b { display: block; margin-bottom: 2px; }
+
+ol.threads span { color: var(--muted); font-size: 14px; }
+
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--=
+line); padding-top: 16px; }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0px, 1fr); gap: 24px; }
+  nav.toc { position: static; display: flex; flex-wrap: wrap; gap: 6px; }
+  nav.toc .lbl { width: 100%; margin: 0px; }
+  nav.toc a { border: 1px solid var(--line); border-radius: 99px; padding: =
+4px 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+html { scroll-behavior: smooth; }
+------MultipartBoundary--y7HeC3KsRd1KNgOTp9oTbZO6IigNpEaQ0zZkpbEKCN------
